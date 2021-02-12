@@ -67,7 +67,8 @@ val html_utf8 = ContentType.Text.Html.withCharset(Charsets.UTF_8)
 // @kotlin.jvm.JvmOverloads
 fun Application.module() {
     if (!sessionDir.exists()) {
-        error("Session directory does not exist ${sessionDir.absolutePath}")
+        sessionDir.mkdirs()
+        // error("Session directory does not exist ${sessionDir.absolutePath}")
     }
     // Because Heroku
     install(XForwardedHeaderSupport)
