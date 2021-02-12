@@ -1,0 +1,85 @@
+#parse("templates/header.vl")
+
+<main role="main">
+
+  <section class="jumbotron">
+    <div class="container">
+
+      <div class="row">
+        <div class="col-11">
+          <h1 class="jumbotron-heading">One on one tracker</h1>
+          <p class="lead text-muted">This leverages your Google calendar to maintain relationships.</p>
+          <p class="text-muted">Prepared ${now.toString($formatter)}</p>
+        </div>
+        <div class="col-1">
+          <p class="text-muted">
+          <img src="${rioter.profilePic}" />
+          <br />
+          ${rioter.given_name}
+          <br />
+          <a href="/logout">Logout</a>
+          </p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+          <hr />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-3">
+          <strong>Rioter</strong>
+        </div>
+        <div class="col-3">
+          <strong>Last/next meeting</strong>
+        </div>
+        <div class="col-3">
+          <strong>Summary</strong>
+        </div>
+        <div class="col-3">
+          <strong>Relationship upkeep</strong>
+        </div>
+      </div>
+      #foreach ($meeting in $report.meetings)
+        #set ($milliseconds = $meeting.datetime.millis - $now.millis)
+        ## <fmt:parseNumber var="days" value="${milliseconds / 86400000}" integerOnly="true" />
+
+
+      <div class="row">
+        <div class="col-3">
+          ${meeting.name}
+        </div>
+        <div class="col-3">
+          ## <fmt:formatDate value="${meeting.datetime}" pattern="MMM d, yyyy h:mm a" />
+          ${meeting.datetime.toString($formatter)}
+        </div>
+        <div class="col-3">
+          ${meeting.summary}
+        </div>
+        <div class="col-3">
+          #*
+          <c:choose>
+            <c:when test="${days >= 1}">
+              in <fmt:formatNumber value="${days}" pattern="0" /> day<c:if test="${days > 1}">s</c:if>
+            </c:when>
+            <c:when test="${days > -1}">
+              Today
+            </c:when>
+            <c:otherwise>
+              <fmt:formatNumber value="${-days}" pattern="0" /> day<c:if test="${days < -1}">s</c:if> ago
+            </c:otherwise>
+          </c:choose>
+          *#
+          ${ago.since($meeting.datetime)}
+          ## ${milliseconds}
+        </div>
+      </div>
+      #end
+
+    </div>
+  </section>
+
+</main>
+
+#parse("templates/footer.vl")

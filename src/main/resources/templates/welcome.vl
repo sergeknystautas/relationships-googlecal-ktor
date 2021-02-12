@@ -1,0 +1,37 @@
+#parse("templates/header.vl")
+
+<main role="main">
+
+  <section class="jumbotron">
+    <div class="container">
+
+      <div class="row">
+        <div class="col">
+
+
+<h1>Relationship building</h1>
+<p>
+Leverage your Google calendar to maintain good relationships.
+</p>
+
+<h2>How to use</h2>
+
+<p>
+This leverages the information in your Google calendar, so understandably, we ask you to sign in with a Google account.
+</p>
+<p>
+After confirming you're willing to use your Google account, we'll load up your calendar and see who you've been meeting with.
+</p>
+<p>
+<a href="/login">Start one-on-one'ing</a>
+</p>
+
+
+        </div>
+
+    </div>
+  </section>
+
+</main>
+
+#parse("templates/footer.vl")

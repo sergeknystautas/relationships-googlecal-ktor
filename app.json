@@ -1,0 +1,6 @@
+{
+  "name": "oneonones",
+  "description": "Google calendar tool to help maintain relationships using one on ones, deployed to Heroku.",
+  "image": "heroku/java",
+  "addons": [  ]
+}

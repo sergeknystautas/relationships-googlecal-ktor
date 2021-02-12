@@ -1,0 +1,23 @@
+Stuff to do
+
+DEVELOPMENT
+- Get a single report calculated
+- Get it displayed like the old approach, with some small visual improvements
+
+
+DEPLOYMENT
+- Get this in git
+- Get this building from a pipeline in heroku
+- Get it working on a heroku pro instance with google auth.
+
+
+BONUS
+- Store sessions in redis instead of local file system (https://devcenter.heroku.com/articles/heroku-redis and https://redislabs.com/lp/redis-java/)
+- Use the time zone from the calendar to show everything in that.
+- Put calendar time zone next to face.
+
+FUTURE
+? Have it persist the report locally
+? Have it able to update a report, so add timestamp of when and change calling, if an existnig one is available.
+
+
