@@ -15,6 +15,7 @@ BONUS
 - Store sessions in redis instead of local file system (https://devcenter.heroku.com/articles/heroku-redis and https://redislabs.com/lp/redis-java/)
 - Use the time zone from the calendar to show everything in that.
 - Put calendar time zone next to face.
+- Highlight what is a recurring meeting (or if you do with this individual)
 
 FUTURE
 ? Have it persist the report locally
