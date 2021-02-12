@@ -3,6 +3,7 @@ out/
 sessions/
 .idea/
 .DS_Store
+.env
 
 pom.xml.tag
 pom.xml.releaseBackup
