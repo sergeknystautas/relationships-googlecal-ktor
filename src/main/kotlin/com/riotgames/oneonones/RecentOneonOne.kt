@@ -11,15 +11,7 @@ import kotlin.collections.ArrayList
 
 data class RecentOneOnOneMeeting (val email: String, val name: String,
                                   val summary: String, val datetime: ReadableInstant)  : Comparable<RecentOneOnOneMeeting> {
-    /*
-    override fun compareTo(other: RecentOneOnOneMeeting) = compareValuesBy(this, other,
-            { it.datetime },
-            { it.email }
-    )
-     */
-
     override fun compareTo(other: RecentOneOnOneMeeting) = compareValues(-this.datetime.millis, -other.datetime.millis)
-
 }
 data class RecentOneOnOneReport (val meetings: List<RecentOneOnOneMeeting>)
 
@@ -27,7 +19,7 @@ class RecentOneonOneBuilder {
     fun build(events: List<Event>): RecentOneOnOneReport {
         val now: ReadableInstant = Instant.now()
 
-        val latestOneonOnes: MutableMap<String, RecentOneOnOneMeeting> = HashMap<String, RecentOneOnOneMeeting>()
+        val latestOneOnOnes: MutableMap<String, RecentOneOnOneMeeting> = HashMap<String, RecentOneOnOneMeeting>()
 
         for (event in events) {
             if (!isOneonOne(event)) {
@@ -35,12 +27,12 @@ class RecentOneonOneBuilder {
                 continue
             }
             val meeting: RecentOneOnOneMeeting = createMeeting(event) ?: continue
-            updateMeeting(latestOneonOnes, meeting, now)
+            updateMeeting(latestOneOnOnes, meeting, now)
 
         }
 
         // Let's sort the meetings now
-        val meetings: List<RecentOneOnOneMeeting> = ArrayList<RecentOneOnOneMeeting>(latestOneonOnes.values)
+        val meetings: List<RecentOneOnOneMeeting> = ArrayList<RecentOneOnOneMeeting>(latestOneOnOnes.values)
         Collections.sort(meetings)
 
         return RecentOneOnOneReport(meetings)
