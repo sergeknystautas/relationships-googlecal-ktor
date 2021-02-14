@@ -1,11 +1,5 @@
 package com.riotgames.oneonones
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets
-import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
-import com.google.api.client.json.jackson2.JacksonFactory
-import com.google.api.services.calendar.Calendar
-import com.google.api.services.calendar.model.Event
 import com.google.gson.reflect.TypeToken
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -27,39 +21,7 @@ import io.ktor.sessions.*
 import com.google.gson.Gson
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
-import java.util.ArrayList
 
-val clientId = System.getenv("OAUTH_CLIENT_ID") ?: "xxxxxxxxxxx.apps.googleusercontent.com"
-val clientSecret = System.getenv("OAUTH_CLIENT_SECRET") ?: "yyyyyyyyyyy"
-
-const val projectName = "innate-harbor-217806"
-const val authorizeUrl = "https://accounts.google.com/o/oauth2/auth"
-const val tokenUrl = "https://www.googleapis.com/oauth2/v3/token"
-// const val certUrl = "https://www.googleapis.com/oauth2/v1/certs"
-
-val googleOauthProvider = OAuthServerSettings.OAuth2ServerSettings(
-        name = "google",
-        authorizeUrl = authorizeUrl,
-        accessTokenUrl = tokenUrl,
-        requestMethod = HttpMethod.Post,
-
-        clientId = clientId,
-        clientSecret = clientSecret,
-        defaultScopes = listOf("profile", // no email, but gives full name, picture, and id
-                "email", // email
-                "https://www.googleapis.com/auth/calendar.readonly", // google calendar
-                "https://www.googleapis.com/auth/admin.directory.user.readonly" // user directory
-        )
-)
-val JSON_FACTORY = JacksonFactory.getDefaultInstance()
-val HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport()
-
-val clientSecretsDetails = GoogleClientSecrets.Details().setClientId(clientId).setClientSecret(clientSecret).setAuthUri(authorizeUrl)
-        .setTokenUri(tokenUrl)
-val clientSecrets = GoogleClientSecrets().setInstalled(clientSecretsDetails)
-
-var CREDENTIAL_BUILDER = GoogleCredential.Builder().setTransport(HTTP_TRANSPORT).setJsonFactory(JSON_FACTORY)
-        .setClientSecrets(clientSecrets)
 
 val html_utf8 = ContentType.Text.Html.withCharset(Charsets.UTF_8)
 
@@ -116,8 +78,11 @@ fun Application.module() {
     // Make this better at some point, to display a useless error message using velocity.
     install(StatusPages) {
         exception<Throwable> { cause ->
-            call.respond(HttpStatusCode.InternalServerError, "Internal Server Error")
-            throw cause
+            // call.respond(HttpStatusCode.InternalServerError, "Internal Server Error")
+            cause.printStackTrace()
+            val model = mutableMapOf<String, Any>()
+            model["cause"] = cause
+            call.respond(VelocityContent("templates/error.vl", model))
         }
     }
 
@@ -142,61 +107,19 @@ fun Application.module() {
             }
 
             // println("rendering some stuff")
-            model.put("rioter", rioter)
-
-            val credential = CREDENTIAL_BUILDER.build().setAccessToken(rioter.accessToken).setRefreshToken(rioter.refreshToken)
-            val service = Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(projectName).build()
-
-
-            // List the next 10 events from the primary calendar.
-            // DateTime now = new DateTime(System.currentTimeMillis());
-            // DateTime lastYear = new DateTime(System.currentTimeMillis() - 1000 * 60 * 60
-            // * 24 * 365);
-
-            // DateTime nextQuarter = new DateTime(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 90 );
-            // DateTime twoYearsAgo = new DateTime(System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 365 * 2 );
-            val items: MutableList<Event> = ArrayList()
-            var page: String? = null
-            while (page == null) {
-                println("calling with token $page")
-                val events = service.events().list("primary").setMaxResults(250) // .setTimeMin(lastYear)
-                        // .setTimeMax(now)
-                        // .setOrderBy("startTime")
-                        .setSingleEvents(false).setShowHiddenInvitations(true) // .setTimeMax(twoYearsAgo).setTimeMin(nextQuarter)
-                        .setPageToken(page).execute()
-                val moreItems = events.items
-                if (moreItems.size > 0) {
-                    val event = moreItems[0]
-                    println(event.start.toString() + " " + event.summary)
-                }
-                items.addAll(moreItems)
-                page = events.nextPageToken
-                if (page == null) {
-                    break
-                }
-            }
-
+            model["rioter"] = rioter
             val now = DateTime(System.currentTimeMillis())
-            val report = RecentOneonOneBuilder().build(items)
-            model.put("report", report)
-            model.put("now", now)
-            model.put("formatter", DateTimeFormat.forPattern("MMM d, yyyy h:mm a"))
-            model.put("ago", DaysSince(now))
+
+            val calendar = retrieveCalendar(rioter, now)
+            // model["report"] = buildRecentOneOnOneReport(rioter, now))
+            model["report"] = RecentOneonOneBuilder().build(calendar.events)
+            model["now"] = now
+            model["formatter"] = DateTimeFormat.forPattern("MMM d, yyyy h:mm a")
+            model["ago"] = DaysSince(now)
 
             call.respond(VelocityContent("templates/showcalendar.vl", model))
 
         }
-
-        /*
-        get("/players") {
-            val model = mutableMapOf<String, Any>()
-            model.put("salt", Random.nextInt())
-            model.put("players", squad.players.filter { it.value.player.bases.size > 0 })
-            // model.put("session", session)
-
-            call.respond(VelocityContent("templates/players.vl", model))
-        }
-        */
 
         static("/public") {
             resources("public")

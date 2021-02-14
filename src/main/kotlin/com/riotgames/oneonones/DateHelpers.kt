@@ -6,6 +6,9 @@ import org.joda.time.PeriodType
 import org.joda.time.format.PeriodFormatter
 import org.joda.time.format.PeriodFormatterBuilder
 
+/**
+ * Printing helper for days since or to an event
+ */
 class DaysSince(private val now: DateTime) {
     private val formatter: PeriodFormatter = PeriodFormatterBuilder().appendYears()
             .appendSuffix(" year", " years")

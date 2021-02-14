@@ -1,0 +1,34 @@
+#parse("templates/header.vl")
+
+<main role="main">
+
+  <section class="jumbotron">
+    <div class="container">
+
+      <div class="row">
+        <div class="col">
+
+
+<h1>Relationship building</h1>
+<p>
+Ooops
+</p>
+
+<pre>
+${cause}
+</pre>
+
+#if ($cause.details.code == 401)
+<p>
+<a href="/logout">Logout</a>
+</p>
+#end
+
+        </div>
+
+    </div>
+  </section>
+
+</main>
+
+#parse("templates/footer.vl")

@@ -2,13 +2,17 @@ Stuff to do
 
 DEVELOPMENT
 - Get a single report calculated
-- Get it displayed like the old approach, with some small visual improvements
+x Get it displayed like the old approach, with some small visual improvements
 
 
 DEPLOYMENT
-- Get this in git
-- Get this building from a pipeline in heroku
-- Get it working on a heroku pro instance with google auth.
+x Get this in git
+x Get this building from a pipeline in heroku
+x Get it working on a heroku pro instance with google auth.
+
+
+BUGS
+- Oauth access tokens not persisting when refreshed
 
 
 BONUS
@@ -16,6 +20,7 @@ BONUS
 - Use the time zone from the calendar to show everything in that.
 - Put calendar time zone next to face.
 - Highlight what is a recurring meeting (or if you do with this individual)
+
 
 FUTURE
 ? Have it persist the report locally

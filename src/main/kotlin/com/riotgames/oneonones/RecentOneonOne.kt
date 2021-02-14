@@ -1,8 +1,5 @@
 package com.riotgames.oneonones
 
-import com.google.api.services.calendar.model.Event
-import com.google.api.services.calendar.model.EventAttendee
-import com.google.api.services.calendar.model.EventDateTime
 import org.joda.time.DateTime
 import org.joda.time.Instant
 import org.joda.time.ReadableInstant
@@ -16,7 +13,7 @@ data class RecentOneOnOneMeeting (val email: String, val name: String,
 data class RecentOneOnOneReport (val meetings: List<RecentOneOnOneMeeting>)
 
 class RecentOneonOneBuilder {
-    fun build(events: List<Event>): RecentOneOnOneReport {
+    fun build(events: List<CachedEvent>): RecentOneOnOneReport {
         val now: ReadableInstant = Instant.now()
 
         val latestOneOnOnes: MutableMap<String, RecentOneOnOneMeeting> = HashMap<String, RecentOneOnOneMeeting>()
@@ -57,16 +54,13 @@ class RecentOneonOneBuilder {
         }
     }
 
-    private fun isOneonOne(event: Event): Boolean {
+    private fun isOneonOne(event: CachedEvent): Boolean {
         if (event.attendees == null) {
-            return false
-        }
-        if (event.attendeesOmitted != null && event.isAttendeesOmitted) {
             return false
         }
         var people = 0
         for (attendee in event.attendees) {
-            if (attendee.resource != null && attendee.isResource) {
+            if (attendee.resource) {
                 continue
             }
             people++
@@ -84,14 +78,14 @@ class RecentOneonOneBuilder {
     /**
      * Get the other attendee.
      */
-    private fun notMe(attendees: List<EventAttendee>): EventAttendee? {
+    private fun notMe(attendees: List<CachedAttendee>): CachedAttendee? {
         for (attendee in attendees) {
             // Skip over rooms
-            if (attendee.resource != null && attendee.isResource) {
+            if (attendee.resource != null && attendee.resource) {
                 continue
             }
             // If it's not you, then yay!
-            if (!attendee.isSelf) {
+            if (!attendee.self) {
                 return attendee
             }
         }
@@ -101,18 +95,18 @@ class RecentOneonOneBuilder {
     /**
      * Creates a meeting for an event and not me.
      */
-    private fun createMeeting(event: Event): RecentOneOnOneMeeting? {
+    private fun createMeeting(event: CachedEvent): RecentOneOnOneMeeting? {
         // println("Creating meeting for ${event}")
         // Other
         val other = notMe(event.attendees) ?: return null
 
         // Return the meeting we are creating
         val start = fromDateTime(event.start) ?: return null
-        val displayName = if (other.displayName != null) other.displayName else other.email
+        val displayName = if (other.name != null) other.name else other.email
         return RecentOneOnOneMeeting(other.email, displayName, event.summary, start)
     }
 
-    private fun fromDateTime(start: EventDateTime): ReadableInstant? {
+    private fun fromDateTime(start: CachedEventDateTime): ReadableInstant? {
         var dateMaybeTime = start.dateTime
         if (dateMaybeTime == null) {
             dateMaybeTime = start.date
