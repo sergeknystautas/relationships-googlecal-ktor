@@ -23,9 +23,12 @@ This leverages the information in your Google calendar, so understandably, we as
 After confirming you're willing to use your Google account, we'll load up your calendar and see who you've been meeting with.
 </p>
 <p>
-<a href="/login">Start one-on-one'ing</a>
+<a href="/login">Start one-on-one'ing <img src="/public/btn_google_signin_dark_normal_web.png" /></a>
 </p>
-
+<br />
+<br />
+<br />
+#parse("templates/knownprobs.vl")
 
         </div>
 

@@ -6,12 +6,12 @@
     <div class="container">
 
       <div class="row">
-        <div class="col-11">
+        <div class="col-10">
           <h1 class="jumbotron-heading">One on one tracker</h1>
           <p class="lead text-muted">This leverages your Google calendar to maintain relationships.</p>
           <p class="text-muted">Prepared ${now.toString($formatter)}</p>
         </div>
-        <div class="col-1">
+        <div class="col-2">
           <p class="text-muted">
           <img src="${rioter.profilePic}" />
           <br />
@@ -23,8 +23,6 @@
       </div>
       <div class="row">
         <div class="col-12">
-          <hr />
-
           <p class="bg-warning text-dark">This currently only pulls the first 500 events.</p>
         </div>
       </div>

@@ -9,7 +9,11 @@ import java.util.ArrayList
 
 fun retrieveCalendar(rioter: MyRioterInfo, now: DateTime): CachedCalendar {
     val credential = CREDENTIAL_BUILDER.build().setAccessToken(rioter.accessToken).setRefreshToken(rioter.refreshToken)
+
+    // This doesn't work yet, so commenting it out but if can get the refresh token, can see if this works.
+    // or might implement a different pattern.
     val originalAccessToken = credential.accessToken
+    // refreshToken(rioter)
 
     val service = Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(projectName).build()
 
@@ -41,13 +45,11 @@ fun retrieveCalendar(rioter: MyRioterInfo, now: DateTime): CachedCalendar {
         }
     }
 
-    /*
     if (originalAccessToken != credential.accessToken) {
-        rioter.accessToken = credential.accessToken
-        rioter.refreshToken = credential.refreshToken
-        credential.refreshListeners
+        updateRioterInfo(rioter, credential.accessToken, credential.refreshToken)
+        // This doesn't work yet, so had this while trying to confirm it would rather than it silently working
+        // error("We updated ${rioter.given_name}'s oauth credentials!")
     }
-    */
 
     val calendarCache = calendarBuilder.createCalendar(items)
 

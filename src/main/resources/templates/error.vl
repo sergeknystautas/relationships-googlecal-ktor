@@ -24,6 +24,8 @@ ${cause}
 </p>
 #end
 
+#parse("templates/knownprobs.vl")
+
         </div>
 
     </div>

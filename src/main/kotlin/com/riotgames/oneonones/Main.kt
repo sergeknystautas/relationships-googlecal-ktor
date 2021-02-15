@@ -23,11 +23,13 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 
 
-val html_utf8 = ContentType.Text.Html.withCharset(Charsets.UTF_8)
-
+/**
+ * Configures the webserver and does routing.
+ */
 @Suppress("unused") // Referenced in application.conf
 // @kotlin.jvm.JvmOverloads
 fun Application.module() {
+    // This probably shouldn't be here... it initializes the session storage directory.
     if (!sessionDir.exists()) {
         sessionDir.mkdirs()
         // error("Session directory does not exist ${sessionDir.absolutePath}")
@@ -136,6 +138,9 @@ fun Application.module() {
                 handle {
                     val principal = call.authentication.principal<OAuthAccessTokenResponse.OAuth2>()
                             ?: error("No principal")
+
+                    // TODO: Trying to debug why there is no refresh token.
+                    // println(principal)
 
                     // Call back to google to get more data about the user
                     val response = HttpClient(Apache).request<HttpResponse>("https://www.googleapis.com/userinfo/v2/me") {
