@@ -5,7 +5,10 @@ import com.google.api.services.calendar.model.Event
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.joda.time.DateTime
+import java.io.ByteArrayOutputStream
+import java.nio.charset.StandardCharsets.UTF_8
 import java.util.ArrayList
+import java.util.zip.GZIPOutputStream
 
 fun retrieveCalendar(rioter: MyRioterInfo, now: DateTime): CachedCalendar {
     val credential = CREDENTIAL_BUILDER.build().setAccessToken(rioter.accessToken).setRefreshToken(rioter.refreshToken)
@@ -26,17 +29,15 @@ fun retrieveCalendar(rioter: MyRioterInfo, now: DateTime): CachedCalendar {
     // DateTime twoYearsAgo = new DateTime(System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 365 * 2 );
     val items: MutableList<Event> = ArrayList()
     var page: String? = null
-    while (page == null) {
+    while (true) {
         println("calling with token $page")
-        val events = service.events().list("primary").setMaxResults(500) // .setTimeMin(lastYear)
-            // .setTimeMax(now)
-            // .setOrderBy("startTime")
+        val events = service.events().list("primary").setMaxResults(500)
             .setSingleEvents(false).setShowHiddenInvitations(true) // .setTimeMax(twoYearsAgo).setTimeMin(nextQuarter)
             .setPageToken(page).execute()
         val moreItems = events.items
         if (moreItems.size > 0) {
             val event = moreItems[0]
-            println(event.start.toString() + " " + event.summary)
+            // println("${event.start} ${event.summary}")
         }
         items.addAll(moreItems)
         page = events.nextPageToken
@@ -54,9 +55,22 @@ fun retrieveCalendar(rioter: MyRioterInfo, now: DateTime): CachedCalendar {
     val calendarCache = calendarBuilder.createCalendar(items)
 
     val json = Json.encodeToString(calendarCache)
-    println("Json is ${json.length}  long for ${items.size} events")
+    println("Json is ${json.length} long for ${items.size} events")
+
+    val compressedJson = gzip(json)
+    println("Compressed is ${compressedJson.size} long")
+
+    // val bytes = MsgPack.default.encodeToByteArray(calendarCache)
+    // println("MsgPack is ${bytes.length} long")
 
     return calendarCache
+}
+
+
+fun gzip(content: String): ByteArray {
+    val bos = ByteArrayOutputStream()
+    GZIPOutputStream(bos).bufferedWriter(UTF_8).use { it.write(content) }
+    return bos.toByteArray()
 }
 
 /*

@@ -116,8 +116,9 @@ fun Application.module() {
             // model["report"] = buildRecentOneOnOneReport(rioter, now))
             model["report"] = RecentOneonOneBuilder().build(calendar.events)
             model["now"] = now
-            model["formatter"] = DateTimeFormat.forPattern("MMM d, yyyy h:mm a")
-            model["ago"] = DaysSince(now)
+            model["preparedFormatter"] = DateTimeFormat.forPattern("MMM d, yyyy h:mm a")
+            model["formatter"] = DateTimeFormat.forPattern("EE, MMM d, yyyy")
+            model["ago"] = DaysSince(now.withTimeAtStartOfDay())
 
             call.respond(VelocityContent("templates/showcalendar.vl", model))
 

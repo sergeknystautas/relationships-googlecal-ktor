@@ -9,7 +9,7 @@ import org.joda.time.format.PeriodFormatterBuilder
 /**
  * Printing helper for days since or to an event
  */
-class DaysSince(private val now: DateTime) {
+class DaysSince(val now: DateTime) {
     private val formatter: PeriodFormatter = PeriodFormatterBuilder().appendYears()
             .appendSuffix(" year", " years")
             .appendSeparator(", ")
@@ -24,4 +24,10 @@ class DaysSince(private val now: DateTime) {
         val period = Period(ago, now, PeriodType.yearMonthDay())
         return period.toString(formatter)
     }
+
+    fun until(ago: DateTime) :String {
+        val period = Period(ago, now, PeriodType.yearMonthDay()).negated()
+        return period.toString(formatter)
+    }
+
 }

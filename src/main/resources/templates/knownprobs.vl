@@ -1,5 +1,7 @@
-<h4>Known problems</h4>
+<h4>Known issues</h4>
 <ul>
 <li>Authorization should but <a href="https://youtrack.jetbrains.com/issue/KTOR-2128">does not automatically update</a>.  After an hour or so, you'll get an error, and have to logout and log back in.</li>
-<li>Calendar data is cached, but the first time loading can be slow, and because I'm avoiding a Javascript framework for now, it's a 90s-era browser experience.</li>
+<li>This is slow for large calendars.  Some data caching will happen at some point.</li>
+## <li>Calendar data is cached, but the first time loading can be slow, and because I'm avoiding a Javascript framework for now, it's a 90s-era browser experience.</li>
+<li>Some types of meetings are counted as 1:1s when they're not.</li>
 </ul>

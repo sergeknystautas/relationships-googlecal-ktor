@@ -68,12 +68,17 @@ class CachedCalendarBuilder {
         val attendees = ArrayList<CachedAttendee>()
         if (!gEvent.isAttendeesOmitted && gEvent.attendees != null) {
             for (gAttendee in gEvent.attendees) {
+                // We should skip the declined attendees
+                if (gAttendee.responseStatus == "declined") {
+                    continue
+                }
                 val attendee = createAttendee(gAttendee)
                 attendees.add(attendee)
             }
         }
         if (gEvent.summary == null || gEvent.start == null) {
-            println(gEvent)
+            // Turns out these are cancelled events, which is useful to know when I start sync'ing.
+            // println(gEvent)
         }
         return CachedEvent(attendees, gEvent.summary?: "", CachedEventDateTime(gEvent.start))
     }

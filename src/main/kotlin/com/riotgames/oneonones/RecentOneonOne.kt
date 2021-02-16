@@ -68,10 +68,6 @@ class RecentOneonOneBuilder {
         if (people != 2) {
             return false
         }
-        // TODO: Need to check for group invites
-        // if (true) {
-        //    MyAppServlet.writeEvent(event)
-        //}
         return true
     }
 
@@ -81,7 +77,7 @@ class RecentOneonOneBuilder {
     private fun notMe(attendees: List<CachedAttendee>): CachedAttendee? {
         for (attendee in attendees) {
             // Skip over rooms
-            if (attendee.resource != null && attendee.resource) {
+            if (attendee.resource) {
                 continue
             }
             // If it's not you, then yay!
@@ -102,7 +98,7 @@ class RecentOneonOneBuilder {
 
         // Return the meeting we are creating
         val start = fromDateTime(event.start) ?: return null
-        val displayName = if (other.name != null) other.name else other.email
+        val displayName = other.name ?: other.email
         return RecentOneOnOneMeeting(other.email, displayName, event.summary, start)
     }
 
@@ -111,6 +107,6 @@ class RecentOneonOneBuilder {
         if (dateMaybeTime == null) {
             dateMaybeTime = start.date
         }
-        return DateTime(dateMaybeTime!!.value)
+        return DateTime(dateMaybeTime!!.value).withTimeAtStartOfDay()
     }
 }

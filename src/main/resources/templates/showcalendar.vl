@@ -9,7 +9,7 @@
         <div class="col-10">
           <h1 class="jumbotron-heading">One on one tracker</h1>
           <p class="lead text-muted">This leverages your Google calendar to maintain relationships.</p>
-          <p class="text-muted">Prepared ${now.toString($formatter)}</p>
+          <p class="text-muted">Prepared ${now.toString($preparedFormatter)}</p>
         </div>
         <div class="col-2">
           <p class="text-muted">
@@ -21,12 +21,6 @@
           </p>
         </div>
       </div>
-      <div class="row">
-        <div class="col-12">
-          <p class="bg-warning text-dark">This currently only pulls the first 500 events.</p>
-        </div>
-      </div>
-
       <div class="row">
         <div class="col-3">
           <strong>Rioter</strong>
@@ -42,37 +36,26 @@
         </div>
       </div>
       #foreach ($meeting in $report.meetings)
-        #set ($milliseconds = $meeting.datetime.millis - $now.millis)
-        ## <fmt:parseNumber var="days" value="${milliseconds / 86400000}" integerOnly="true" />
-
 
       <div class="row">
         <div class="col-3">
           ${meeting.name}
         </div>
         <div class="col-3">
-          ## <fmt:formatDate value="${meeting.datetime}" pattern="MMM d, yyyy h:mm a" />
           ${meeting.datetime.toString($formatter)}
         </div>
         <div class="col-3">
           ${meeting.summary}
         </div>
         <div class="col-3">
-          #*
-          <c:choose>
-            <c:when test="${days >= 1}">
-              in <fmt:formatNumber value="${days}" pattern="0" /> day<c:if test="${days > 1}">s</c:if>
-            </c:when>
-            <c:when test="${days > -1}">
-              Today
-            </c:when>
-            <c:otherwise>
-              <fmt:formatNumber value="${-days}" pattern="0" /> day<c:if test="${days < -1}">s</c:if> ago
-            </c:otherwise>
-          </c:choose>
-          *#
-          ${ago.since($meeting.datetime)}
-          ## ${milliseconds}
+          #if ($meeting.datetime.isEqual($ago.now))
+            Today
+          #elseif ($meeting.datetime.isBefore($ago.now))
+            ${ago.since($meeting.datetime)} ago
+          #else
+            in ${ago.until($meeting.datetime)}
+          #end
+
         </div>
       </div>
       #end
