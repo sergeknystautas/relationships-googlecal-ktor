@@ -1,7 +1,6 @@
 package com.riotgames.oneonones
 
 import org.joda.time.DateTime
-import org.joda.time.Instant
 import org.joda.time.ReadableInstant
 import java.util.*
 import kotlin.collections.ArrayList
@@ -12,60 +11,69 @@ data class RecentOneOnOneMeeting (val email: String, val name: String,
 }
 data class RecentOneOnOneReport (val meetings: List<RecentOneOnOneMeeting>)
 
-class RecentOneonOneBuilder {
-    fun build(events: List<CachedEvent>): RecentOneOnOneReport {
-        val now: ReadableInstant = Instant.now()
+class RecentOneOnOneBuilder {
+    fun build(events: List<CachedEvent>, today: ReadableInstant): RecentOneOnOneReport {
 
         val latestOneOnOnes: MutableMap<String, RecentOneOnOneMeeting> = HashMap<String, RecentOneOnOneMeeting>()
 
-        for (event in events) {
-            if (!isOneonOne(event)) {
+        // I need to sort the events
+        for (event in events.sortedBy { it.start }) {
+            if (!isOneOnOne(event)) {
                 // Skip events that are not one on ones
                 continue
             }
+            // TODO: handle recurring events?
             val meeting: RecentOneOnOneMeeting = createMeeting(event) ?: continue
-            updateMeeting(latestOneOnOnes, meeting, now)
-
+            /*
+            if (meeting.email == "jblazquez@riotgames.com") {
+                println(event)
+            }
+            */
+            updateMeeting(latestOneOnOnes, meeting, today)
         }
 
-        // Let's sort the meetings now
-        val meetings: List<RecentOneOnOneMeeting> = ArrayList<RecentOneOnOneMeeting>(latestOneOnOnes.values)
-        Collections.sort(meetings)
+        // Let's sort the meetings now, well, seems like we don't really need to.
+        val meetings: MutableList<RecentOneOnOneMeeting> = ArrayList<RecentOneOnOneMeeting>(latestOneOnOnes.values)
+        meetings.sort()
 
         return RecentOneOnOneReport(meetings)
     }
 
-    private fun updateMeeting(latestOneonOnes: MutableMap<String, RecentOneOnOneMeeting>, meeting: RecentOneOnOneMeeting, now: ReadableInstant) {
-        val lastMeeting: RecentOneOnOneMeeting? = latestOneonOnes[meeting.email]
+    private fun updateMeeting(latestOneOnOnes: MutableMap<String, RecentOneOnOneMeeting>,
+                              meeting: RecentOneOnOneMeeting, today: ReadableInstant) {
+        val lastMeeting: RecentOneOnOneMeeting? = latestOneOnOnes[meeting.email]
+        // aside from null, there's a 3x3 grid of lastmeeting and meeting being before, today or after
         if (lastMeeting == null) {
-            latestOneonOnes[meeting.email] = meeting
-            return
-        }
-        if (lastMeeting.datetime.isBefore(now)) {
-            // If the last event we have is in the past, then we want this newer one.
-            if (lastMeeting.datetime.isBefore(meeting.datetime)) {
-                latestOneonOnes[meeting.email] = meeting
+            latestOneOnOnes[meeting.email] = meeting
+        } else if (lastMeeting.datetime.isEqual(today)) {
+            // Today is the best possibility, nothing could be better
+            // so do nothing
+        } else if (meeting.datetime.isEqual(today)) {
+            // we always want today if it is, so set and forget
+            latestOneOnOnes[meeting.email] = meeting
+        } else if (meeting.datetime.isAfter(today)) {
+            // A future meeting is the next best thing
+            if (lastMeeting.datetime.isBefore(today)) {
+                // We had a date in the past, so overwrite it
+                latestOneOnOnes[meeting.email] = meeting
+            } else if (meeting.datetime.isBefore(lastMeeting.datetime)) {
+                // If meeting will happen before lastMeeting, then we prefer that
+                latestOneOnOnes[meeting.email] = meeting
             }
         } else {
-            // This is in the future, so we want the soonest item.
-            if (lastMeeting.datetime.isAfter(meeting.datetime)) {
-                latestOneonOnes[meeting.email] = meeting
+            // Worse case is the meeting is in the past.
+            if (lastMeeting.datetime.isBefore(today) && meeting.datetime.isAfter(lastMeeting.datetime)) {
+                // If the last event we have is also in the past, we want the more recent one.
+                latestOneOnOnes[meeting.email] = meeting
             }
         }
     }
 
-    private fun isOneonOne(event: CachedEvent): Boolean {
-        if (event.attendees == null) {
+    private fun isOneOnOne(event: CachedEvent): Boolean {
+        if (event.attendeeCount != 2 || event.nonResourceCount !=2 ) {
             return false
         }
-        var people = 0
-        for (attendee in event.attendees) {
-            if (attendee.resource) {
-                continue
-            }
-            people++
-        }
-        if (people != 2) {
+        if (me(event.attendees)?.responseStatus == "declined") {
             return false
         }
         return true
@@ -82,6 +90,19 @@ class RecentOneonOneBuilder {
             }
             // If it's not you, then yay!
             if (!attendee.self) {
+                return attendee
+            }
+        }
+        return null
+    }
+
+    /**
+     * Get the other attendee.
+     */
+    private fun me(attendees: List<CachedAttendee>): CachedAttendee? {
+        for (attendee in attendees) {
+            // If it's you, then yay!
+            if (attendee.self) {
                 return attendee
             }
         }

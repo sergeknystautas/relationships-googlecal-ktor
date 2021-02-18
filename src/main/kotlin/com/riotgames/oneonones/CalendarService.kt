@@ -5,6 +5,8 @@ import com.google.api.services.calendar.model.Event
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.joda.time.DateTime
+import org.joda.time.format.DateTimeFormat
+import org.joda.time.format.ISODateTimeFormat
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets.UTF_8
 import java.util.ArrayList
@@ -24,6 +26,15 @@ fun retrieveCalendar(rioter: MyRioterInfo, now: DateTime): CachedCalendar {
     // DateTime now = new DateTime(System.currentTimeMillis());
     // DateTime lastYear = new DateTime(System.currentTimeMillis() - 1000 * 60 * 60
     // * 24 * 365);
+    var lastYear = now.minusWeeks(52)
+    var nextMonths = now.plusWeeks(8)
+    // var RFC3339 = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ssXXX")
+    var RFC3339 = ISODateTimeFormat.dateTime()
+    // "2021-01-10T10:00:00-08:00"
+    var timeMin = com.google.api.client.util.DateTime(RFC3339.print(lastYear))
+    // "2021-03-20T10:00:00-08:00"
+    var timeMax = com.google.api.client.util.DateTime(RFC3339.print(nextMonths))
+    println (RFC3339.print(nextMonths))
 
     // DateTime nextQuarter = new DateTime(System.currentTimeMillis() + 1000 * 60 * 60 * 24 * 90 );
     // DateTime twoYearsAgo = new DateTime(System.currentTimeMillis() - 1000 * 60 * 60 * 24 * 365 * 2 );
@@ -32,13 +43,10 @@ fun retrieveCalendar(rioter: MyRioterInfo, now: DateTime): CachedCalendar {
     while (true) {
         println("calling with token $page")
         val events = service.events().list("primary").setMaxResults(500)
-            .setSingleEvents(false).setShowHiddenInvitations(true) // .setTimeMax(twoYearsAgo).setTimeMin(nextQuarter)
+            .setTimeMin(timeMin).setTimeMax(timeMax)
+            .setSingleEvents(true).setShowHiddenInvitations(true) // .setTimeMax(twoYearsAgo).setTimeMin(nextQuarter)
             .setPageToken(page).execute()
         val moreItems = events.items
-        if (moreItems.size > 0) {
-            val event = moreItems[0]
-            // println("${event.start} ${event.summary}")
-        }
         items.addAll(moreItems)
         page = events.nextPageToken
         if (page == null) {
@@ -72,10 +80,3 @@ fun gzip(content: String): ByteArray {
     GZIPOutputStream(bos).bufferedWriter(UTF_8).use { it.write(content) }
     return bos.toByteArray()
 }
-
-/*
-fun buildRecentOneOnOneReport(calendar: CachedCalendar): RecentOneOnOneReport {
-
-    return RecentOneonOneBuilder().build(items)
-}
-*/

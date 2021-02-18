@@ -111,14 +111,15 @@ fun Application.module() {
             // println("rendering some stuff")
             model["rioter"] = rioter
             val now = DateTime(System.currentTimeMillis())
+            val today = now.withTimeAtStartOfDay()
 
             val calendar = retrieveCalendar(rioter, now)
             // model["report"] = buildRecentOneOnOneReport(rioter, now))
-            model["report"] = RecentOneonOneBuilder().build(calendar.events)
+            model["report"] = RecentOneOnOneBuilder().build(calendar.events, today)
             model["now"] = now
             model["preparedFormatter"] = DateTimeFormat.forPattern("MMM d, yyyy h:mm a")
             model["formatter"] = DateTimeFormat.forPattern("EE, MMM d, yyyy")
-            model["ago"] = DaysSince(now.withTimeAtStartOfDay())
+            model["ago"] = DaysSince(today)
 
             call.respond(VelocityContent("templates/showcalendar.vl", model))
 
