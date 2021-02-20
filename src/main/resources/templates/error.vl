@@ -10,6 +10,19 @@
 
 
 <h1>Relationship building</h1>
+#if ($cause.details.code == 401)
+<p>
+You will need to log out and sign back in.
+</p>
+
+<p>
+<a href="/logout">Logout</a>
+<br />
+<br />
+<br />
+<br />
+</p>
+#else
 <p>
 Ooops
 </p>
@@ -17,12 +30,8 @@ Ooops
 <pre>
 ${cause}
 </pre>
-
-#if ($cause.details.code == 401)
-<p>
-<a href="/logout">Logout</a>
-</p>
 #end
+
 
 #parse("templates/knownprobs.vl")
 

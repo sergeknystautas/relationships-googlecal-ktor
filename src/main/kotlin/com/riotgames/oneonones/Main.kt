@@ -1,5 +1,6 @@
 package com.riotgames.oneonones
 
+import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.gson.reflect.TypeToken
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -79,12 +80,12 @@ fun Application.module() {
 
     // Make this better at some point, to display a useless error message using velocity.
     install(StatusPages) {
+        exception<GoogleJsonResponseException> { cause ->
+            displayError(call, cause, cause.details.code != 401)
+        }
         exception<Throwable> { cause ->
             // call.respond(HttpStatusCode.InternalServerError, "Internal Server Error")
-            cause.printStackTrace()
-            val model = mutableMapOf<String, Any>()
-            model["cause"] = cause
-            call.respond(VelocityContent("templates/error.vl", model))
+            displayError(call, cause, true)
         }
     }
 
@@ -123,6 +124,11 @@ fun Application.module() {
 
             call.respond(VelocityContent("templates/showcalendar.vl", model))
 
+        }
+
+        // Validate error handling
+        get("/testerror") {
+            throw RuntimeException("Manually created error")
         }
 
         static("/public") {
@@ -198,6 +204,17 @@ fun Application.module() {
         }
 
     }
+}
+
+private suspend fun displayError(call: ApplicationCall, cause: Throwable, printStack: Boolean) {
+    if (printStack) {
+        cause.printStackTrace()
+    } else {
+        println("We are told to not print an error")
+    }
+    val model = mutableMapOf<String, Any>()
+    model["cause"] = cause
+    call.respond(VelocityContent("templates/error.vl", model))
 }
 
 private fun ApplicationCall.redirectUrl(path: String): String {
