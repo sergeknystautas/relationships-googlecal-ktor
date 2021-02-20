@@ -155,7 +155,7 @@ fun Application.module() {
                         header("Authorization", "Bearer ${principal.accessToken}")
                     }
                     val json = response.readText()
-                    println(json)
+                    // println(json)
 
                     val gson = Gson()
                     val mapType = object : TypeToken<Map<String, Any>>() {}.type
@@ -177,6 +177,7 @@ fun Application.module() {
                     if (locale == null) {
                         locale = "en"
                     }
+                    println("SUCCESSFUL LOGIN by $name / $email")
 
                     // Store to file sessions the user id
                     saveRioterInfo(principal, data)
