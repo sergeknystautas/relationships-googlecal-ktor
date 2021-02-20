@@ -12,12 +12,17 @@ import java.nio.charset.StandardCharsets.UTF_8
 import java.util.ArrayList
 import java.util.zip.GZIPOutputStream
 
+/**
+ * Function to call Google Calendar API using the local rioter and a parameter for the time, assumed to be now
+ * in normal operation.  This transforms the Google API objects into condensed and serializable cache objects
+ * defined in CalendarCache.kt.
+ */
 fun retrieveCalendar(rioter: MyRioterInfo, now: DateTime): CachedCalendar {
     val credential = CREDENTIAL_BUILDER.build().setAccessToken(rioter.accessToken).setRefreshToken(rioter.refreshToken)
 
-    // This doesn't work yet, so commenting it out but if can get the refresh token, can see if this works.
+    // TODO This doesn't work yet, so commenting it out but if can get the refresh token, can see if this works.
     // or might implement a different pattern.
-    val originalAccessToken = credential.accessToken
+    // val originalAccessToken = credential.accessToken
     // refreshToken(rioter)
 
     val service = Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(projectName).build()
@@ -54,11 +59,11 @@ fun retrieveCalendar(rioter: MyRioterInfo, now: DateTime): CachedCalendar {
         }
     }
 
-    if (originalAccessToken != credential.accessToken) {
-        updateRioterInfo(rioter, credential.accessToken, credential.refreshToken)
-        // This doesn't work yet, so had this while trying to confirm it would rather than it silently working
-        // error("We updated ${rioter.given_name}'s oauth credentials!")
-    }
+    // TODO: This doesn't work yet, so had this while trying to confirm it would rather than it silently working
+    // if (originalAccessToken != credential.accessToken) {
+        // updateRioterInfo(rioter, credential.accessToken, credential.refreshToken)
+        // // debug("We updated ${rioter.given_name}'s oauth credentials!")
+    // }
 
     val calendarCache = calendarBuilder.createCalendar(items)
 
@@ -75,6 +80,9 @@ fun retrieveCalendar(rioter: MyRioterInfo, now: DateTime): CachedCalendar {
 }
 
 
+/**
+ * Convenience function to gzip data, useful to serialize the JSON more compressed.
+ */
 fun gzip(content: String): ByteArray {
     val bos = ByteArrayOutputStream()
     GZIPOutputStream(bos).bufferedWriter(UTF_8).use { it.write(content) }

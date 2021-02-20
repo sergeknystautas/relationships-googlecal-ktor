@@ -7,6 +7,10 @@ import java.io.File
 import kotlinx.serialization.*
 import kotlinx.serialization.json.*
 
+/**
+ * Serializable representations of who is signed into a site.  We use a cookie with their uid and store this
+ * metadata from the oauth response.
+ */
 data class MyRioterUid(val uid: String)
 @Serializable
 data class MyRioterInfo(var accessToken: String, var refreshToken: String?, val uid: String, val email: String, val given_name: String, val profilePic: String)

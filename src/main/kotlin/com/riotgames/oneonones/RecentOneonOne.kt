@@ -11,24 +11,28 @@ data class RecentOneOnOneMeeting (val email: String, val name: String,
 }
 data class RecentOneOnOneReport (val meetings: List<RecentOneOnOneMeeting>)
 
+/**
+ * This class builds the report of recent one-on-ones.  It looks for meetings that meet the one-on-one definition
+ * as one other person (non-self), 2 invitees, no resources, and nobody "declined".  These are then grouped by
+ * person to show today or the next upcoming event as the first priority, and then the most recent past event
+ * if there are none upcoming.
+ */
 class RecentOneOnOneBuilder {
+    /**
+     * Build the report based on the list of cached events and as of a point in time handed, assumed to be
+     * now or today in normal operation.
+     */
     fun build(events: List<CachedEvent>, today: ReadableInstant): RecentOneOnOneReport {
 
         val latestOneOnOnes: MutableMap<String, RecentOneOnOneMeeting> = HashMap<String, RecentOneOnOneMeeting>()
 
-        // I need to sort the events
+        // I need to sort the events by ascending start time
         for (event in events.sortedBy { it.start }) {
             if (!isOneOnOne(event)) {
                 // Skip events that are not one on ones
                 continue
             }
-            // TODO: handle recurring events?
             val meeting: RecentOneOnOneMeeting = createMeeting(event) ?: continue
-            /*
-            if (meeting.email == "jblazquez@riotgames.com") {
-                println(event)
-            }
-            */
             updateMeeting(latestOneOnOnes, meeting, today)
         }
 
@@ -39,6 +43,12 @@ class RecentOneOnOneBuilder {
         return RecentOneOnOneReport(meetings)
     }
 
+    /**
+     * This is the grouping logic.  For a person I'm meeting, it sees whether the newer event would be
+     * more important than the previous event and use that going forward if so.  If I have no prior events
+     * for this person, then this newer meeting is the one to do.  We pass in the point in time assumed
+     * to be today in normal operations.
+     */
     private fun updateMeeting(latestOneOnOnes: MutableMap<String, RecentOneOnOneMeeting>,
                               meeting: RecentOneOnOneMeeting, today: ReadableInstant) {
         val lastMeeting: RecentOneOnOneMeeting? = latestOneOnOnes[meeting.email]
@@ -69,6 +79,10 @@ class RecentOneOnOneBuilder {
         }
     }
 
+    /**
+     * The caching layer collapses information and allows us to make assumptions so that we simply need
+     * to check for 2 attendees, no resources, and nobody declined to determine it's a one-on-one.
+     */
     private fun isOneOnOne(event: CachedEvent): Boolean {
         if (event.attendeeCount != 2 || event.nonResourceCount !=2 ) {
             return false
@@ -80,7 +94,7 @@ class RecentOneOnOneBuilder {
     }
 
     /**
-     * Get the other attendee.
+     * Get the other attendee in the event.
      */
     private fun notMe(attendees: List<CachedAttendee>): CachedAttendee? {
         for (attendee in attendees) {
@@ -97,7 +111,7 @@ class RecentOneOnOneBuilder {
     }
 
     /**
-     * Get the other attendee.
+     * Get me (or self more accurately) as the attendee object in the event.
      */
     private fun me(attendees: List<CachedAttendee>): CachedAttendee? {
         for (attendee in attendees) {
@@ -110,7 +124,8 @@ class RecentOneOnOneBuilder {
     }
 
     /**
-     * Creates a meeting for an event and not me.
+     * Creates a meeting entry for this report based on the cached event.  This will help with the grouping logic
+     * and then used for presentation layer.
      */
     private fun createMeeting(event: CachedEvent): RecentOneOnOneMeeting? {
         // println("Creating meeting for ${event}")
@@ -123,6 +138,13 @@ class RecentOneOnOneBuilder {
         return RecentOneOnOneMeeting(other.email, displayName, event.summary, start)
     }
 
+    /**
+     * Google calendar API stores the datetime object into places depending on whether this is an event in time
+     * or an all-day event.  This looks in both places, and then uses Joda's "start of day" logic so we are
+     * comparing the date we met someone since the report should show the same number of days until this event
+     * based on date, not time.  eg., without this, at 11am you would see a 1pm event tomorrow as 1 day away
+     * and then at 2pm you would see that 1pm event tomorrow as "today".
+     */
     private fun fromDateTime(start: CachedEventDateTime): ReadableInstant? {
         var dateMaybeTime = start.dateTime
         if (dateMaybeTime == null) {

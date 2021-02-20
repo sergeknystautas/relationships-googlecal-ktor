@@ -115,6 +115,7 @@ class CachedCalendarBuilder {
             // println(gEvent)
             return null
         }
+        // This block is to help determine event anomalies and purely for debugging.
         var isMatch = false
         for (attendee in attendees) {
             if (attendee.email == "jblazquez@riotgames.com") {
@@ -127,11 +128,12 @@ class CachedCalendarBuilder {
         if (gEvent.summary == "GDT Leads - Partner Portal Direction") {
             // println(gEvent)
         }
+        // End debugging.
         return CachedEvent(attendees, attendeeCount, nonResourceCount,
             gEvent.summary?: "", CachedEventDateTime(gEvent.start))
     }
 
-    fun createAttendee(gAttendee: EventAttendee): CachedAttendee {
+    private fun createAttendee(gAttendee: EventAttendee): CachedAttendee {
         return CachedAttendee(gAttendee.displayName, gAttendee.email, gAttendee.responseStatus,
             gAttendee.isSelf, gAttendee.isResource)
     }

@@ -28,23 +28,24 @@ import org.joda.time.format.DateTimeFormat
  * Configures the webserver and does routing.
  */
 @Suppress("unused") // Referenced in application.conf
-// @kotlin.jvm.JvmOverloads
 fun Application.module() {
-    // This probably shouldn't be here... it initializes the session storage directory.
+    // TODO: This probably shouldn't be here... it initializes the session storage directory.
     if (!sessionDir.exists()) {
         sessionDir.mkdirs()
         // error("Session directory does not exist ${sessionDir.absolutePath}")
     }
-    // Because Heroku
+    // Because Heroku, we want to add this header support.
     install(XForwardedHeaderSupport)
     // Basic HTTP improvements
     install(Compression)
-    // How we do server-side templating
+    // How we do server-side templating.  Most people would do freemarker, but the main developer is such a troll.
+    // He would stalk the velocity users group and shit post the velocity engine and say how great freemarker was,
+    // so that rendering engine is dead to me.
     install(Velocity) {
         setProperty("resource.loader", "classpath")
         setProperty("classpath.resource.loader.class", ClasspathResourceLoader::class.java.name)
     }
-    // JSON generation
+    // JSON generation.  We probably don't need this unless we build a thick client that retrives JSON content.
     install(ContentNegotiation) {
         gson {
             // Configure Gson here
@@ -52,6 +53,7 @@ fun Application.module() {
             serializeNulls()
         }
     }
+    // Session management using the SessionService.
     install(Sessions) {
         cookie<MyRioterUid>("oauthSeshId") {
             val secretSignKey = hex("5683a6436b09875f174ebae642cb5a8d") // Generated randomly at https://www.browserling.com/tools/random-hex
@@ -70,52 +72,47 @@ fun Application.module() {
     install(DefaultHeaders)
     install(ConditionalHeaders)
     install(PartialContentSupport)
-
-    install(StatusPages) {
-        exception<Exception> { exception ->
-            call.respond(FreeMarkerContent("error.ftl", exception, "", html_utf8))
-        }
-    }
     */
 
     // Make this better at some point, to display a useless error message using velocity.
     install(StatusPages) {
+        // Added a special handling of this because there is a known bug with KTOR's Oauth to google.
         exception<GoogleJsonResponseException> { cause ->
+            // Send a friendly response to login again if the error is the OAuth token refresh bug.
             displayError(call, cause, cause.details.code != 401)
         }
         exception<Throwable> { cause ->
-            // call.respond(HttpStatusCode.InternalServerError, "Internal Server Error")
             displayError(call, cause, true)
         }
     }
 
+    // URL routing
     routing {
 
-        // Web pages layer
-
+        // The home page
         get("/") {
             val model = mutableMapOf<String, Any>()
             val session = call.sessions.get<MyRioterUid>()
-            // println("looking for session")
+            // If you're not signed in, we'll render with a welcome page.
             if (session == null) {
                 call.respond(VelocityContent("templates/welcome.vl", model))
                 return@get
             }
 
-            // println("looking for rioter")
+            // If you sent a cookie like you're logged in, but we can't find you in our session service
+            // Redirect you to the logout page.
             val rioter = loadRioterInfo(session.uid)
             if (rioter == null) {
                 call.respondRedirect("/logout", permanent = false)
                 return@get
             }
 
-            // println("rendering some stuff")
+            // Generate our main report
             model["rioter"] = rioter
             val now = DateTime(System.currentTimeMillis())
             val today = now.withTimeAtStartOfDay()
 
             val calendar = retrieveCalendar(rioter, now)
-            // model["report"] = buildRecentOneOnOneReport(rioter, now))
             model["report"] = RecentOneOnOneBuilder().build(calendar.events, today)
             model["now"] = now
             model["preparedFormatter"] = DateTimeFormat.forPattern("MMM d, yyyy h:mm a")
@@ -126,16 +123,19 @@ fun Application.module() {
 
         }
 
-        // Validate error handling
+        // URL that always crashes to manually test error handling.
         get("/testerror") {
             throw RuntimeException("Manually created error")
         }
 
+        // Static resources, so any request to /public/* will be served by local resources/public/*
         static("/public") {
             resources("public")
         }
 
         // Authentication layer
+
+        // Clear the session, go back to the home page.
         get("/logout") {
             call.sessions.clear<MyRioterUid>()
             call.respondRedirect("/", permanent = false)
@@ -184,21 +184,6 @@ fun Application.module() {
                     // Save this in the user's session to persist
                     call.sessions.set(MyRioterUid(uid))
 
-                    /*
-                    // Ensure there is a player, if not create it it
-                    // Then tie the session to this player
-                    var playerManager = squad.players.get(uid)
-                    if (playerManager == null) {
-                        val player = MCTPlayer(uid, name, locale)
-                        if (email != null) {
-                            player.email = email
-                        }
-                        val playerManager = MCTPlayerManager(player)
-                        // mike.createStarterBase()
-                        squad.players.put(player.uid, playerManager)
-                    }
-                    */
-
                     call.respondRedirect("/")
                 }
             }
@@ -207,6 +192,9 @@ fun Application.module() {
     }
 }
 
+/**
+ * Convenience function to display the error page.
+ */
 private suspend fun displayError(call: ApplicationCall, cause: Throwable, printStack: Boolean) {
     if (printStack) {
         cause.printStackTrace()
@@ -218,6 +206,9 @@ private suspend fun displayError(call: ApplicationCall, cause: Throwable, printS
     call.respond(VelocityContent("templates/error.vl", model))
 }
 
+/**
+ * Convenience function to calculate the URL when redirecting.
+ */
 private fun ApplicationCall.redirectUrl(path: String): String {
     val defaultPort = if (request.origin.scheme == "http") 80 else 443
     val hostPort = request.host()!! + request.origin.port.let { port -> if (port == defaultPort) "" else ":$port" }
@@ -225,4 +216,7 @@ private fun ApplicationCall.redirectUrl(path: String): String {
     return "$protocol://$hostPort$path"
 }
 
+/**
+ * Function that Heroku runs to start the KTor web server.  This is defined in application.conf.
+ */
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)

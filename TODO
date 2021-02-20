@@ -1,29 +1,17 @@
 Stuff to do
 
-DEVELOPMENT
-x Get a single report calculated
-x Get it displayed like the old approach, with some small visual improvements
-
-
-DEPLOYMENT
-x Get this in git
-x Get this building from a pipeline in heroku
-x Get it working on a heroku pro instance with google auth.
-
-
 BUGS
-- Oauth access tokens not persisting when refreshed
+These have been moved to https://github.com/sergeknystautas/relationships-googlecal-ktor/issues.
 
-
-BONUS
+IMPROVEMENTS (make what is there, better)
 - Store sessions in redis instead of local file system (https://devcenter.heroku.com/articles/heroku-redis and https://redislabs.com/lp/redis-java/)
 - Use the time zone from the calendar to show everything in that.
 - Put calendar time zone next to face.
 - Highlight what is a recurring meeting (or if you do with this individual)
+- Cache the calendar data somewhere (redis or mysql?).  Store when the calendar was last updated, store the sync token, and use that for faster queries to update what is cached.
 
-
-FUTURE
-? Have it persist the report locally
-? Have it able to update a report, so add timestamp of when and change calling, if an existnig one is available.
+ENHANCEMENTS (take this in new directions)
+- In discussing the way I use the report, it'd be good to split this report into different sections and give guidance on the why.
+- Use the people API/user directory to find your reports.  Show that on the existing report and add a new report to show my reports and manager and if I have recurring events.
 
 
