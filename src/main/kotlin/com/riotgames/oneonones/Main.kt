@@ -22,6 +22,9 @@ import io.ktor.sessions.*
 import com.google.gson.Gson
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
+import io.sentry.Sentry
+import io.sentry.SentryOptions
+import io.sentry.protocol.User
 
 
 /**
@@ -34,6 +37,15 @@ fun Application.module() {
         sessionDir.mkdirs()
         // error("Session directory does not exist ${sessionDir.absolutePath}")
     }
+    // Sets up Sentry error reporting
+    if (System.getenv("SENTRY_DSN") != null) {
+        // This will normally only be configured in production.  If this is not configured, the calls to send
+        //   exceptions to Sentry will be ignored.
+        Sentry.init { options: SentryOptions ->
+            options.dsn = System.getenv("SENTRY_DSN")
+            options.environment = System.getenv("SENTRY_ENVIRONMENT") ?: "development"
+        }
+    }
     // Because Heroku, we want to add this header support.
     install(XForwardedHeaderSupport)
     // Basic HTTP improvements
@@ -45,7 +57,7 @@ fun Application.module() {
         setProperty("resource.loader", "classpath")
         setProperty("classpath.resource.loader.class", ClasspathResourceLoader::class.java.name)
     }
-    // JSON generation.  We probably don't need this unless we build a thick client that retrives JSON content.
+    // JSON generation.  We probably don't need this unless we build a thick client that retrieves JSON content.
     install(ContentNegotiation) {
         gson {
             // Configure Gson here
@@ -168,7 +180,7 @@ fun Application.module() {
                     // data["name"]: "Serge Knystautas
                     // data["picture"]: "https://lh4.googleusercontent.com/-ARGiPYpNomI/AAAAAAAAAAI/AAAAAAAAAAA/AMZuucn2Xy9D80eszVXdwmJkhbCJcXaQ2g/photo.jpg"
                     var locale = data["locale"] as String? // : "en"
-                    var email = data["email"] as String? // : "sergek@lokitech.com",
+                    val email = data["email"] as String? // : "sergek@lokitech.com",
                     // data["verified_email"]: true,
 
                     if (name == null) {
@@ -197,6 +209,24 @@ fun Application.module() {
  */
 private suspend fun displayError(call: ApplicationCall, cause: Throwable, printStack: Boolean) {
     if (printStack) {
+        val rioter = call.sessions.get<MyRioterUid>()?.let { loadRioterInfo(it.uid) }
+        val user = User().apply {
+            // If you're signed in, we add this user info to the crash report
+            email = rioter?.email
+            ipAddress = call.request.origin.remoteHost
+        }
+        Sentry.withScope { scope ->
+            // scope.level = SentryLevel.FATAL
+            // scope.transaction = "main"
+            // scope.setContexts()
+            scope.user = user
+            scope.setTag("environment", "protuction")
+            scope.removeTag("server_name")
+            scope.setTag("uri", call.request.path())
+
+            // This message includes the data set to the scope in this block:
+            Sentry.captureException(cause)
+        }
         cause.printStackTrace()
     } else {
         println("We are told to not print an error")
@@ -211,7 +241,7 @@ private suspend fun displayError(call: ApplicationCall, cause: Throwable, printS
  */
 private fun ApplicationCall.redirectUrl(path: String): String {
     val defaultPort = if (request.origin.scheme == "http") 80 else 443
-    val hostPort = request.host()!! + request.origin.port.let { port -> if (port == defaultPort) "" else ":$port" }
+    val hostPort = request.host() + request.origin.port.let { port -> if (port == defaultPort) "" else ":$port" }
     val protocol = request.origin.scheme
     return "$protocol://$hostPort$path"
 }
