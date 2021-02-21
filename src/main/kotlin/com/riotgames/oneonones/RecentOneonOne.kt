@@ -1,6 +1,7 @@
 package com.riotgames.oneonones
 
 import org.joda.time.DateTime
+import org.joda.time.DateTimeZone
 import org.joda.time.ReadableInstant
 import java.util.*
 import kotlin.collections.ArrayList
@@ -22,7 +23,7 @@ class RecentOneOnOneBuilder {
      * Build the report based on the list of cached events and as of a point in time handed, assumed to be
      * now or today in normal operation.
      */
-    fun build(events: List<CachedEvent>, today: ReadableInstant): RecentOneOnOneReport {
+    fun build(events: List<CachedEvent>, today: ReadableInstant, jodaTZ: DateTimeZone): RecentOneOnOneReport {
 
         val latestOneOnOnes: MutableMap<String, RecentOneOnOneMeeting> = HashMap<String, RecentOneOnOneMeeting>()
 
@@ -32,12 +33,12 @@ class RecentOneOnOneBuilder {
                 // Skip events that are not one on ones
                 continue
             }
-            val meeting: RecentOneOnOneMeeting = createMeeting(event) ?: continue
+            val meeting: RecentOneOnOneMeeting = createMeeting(event, jodaTZ) ?: continue
             updateMeeting(latestOneOnOnes, meeting, today)
         }
 
         // Let's sort the meetings now, well, seems like we don't really need to.
-        val meetings: MutableList<RecentOneOnOneMeeting> = ArrayList<RecentOneOnOneMeeting>(latestOneOnOnes.values)
+        val meetings: MutableList<RecentOneOnOneMeeting> = ArrayList(latestOneOnOnes.values)
         meetings.sort()
 
         return RecentOneOnOneReport(meetings)
@@ -127,13 +128,13 @@ class RecentOneOnOneBuilder {
      * Creates a meeting entry for this report based on the cached event.  This will help with the grouping logic
      * and then used for presentation layer.
      */
-    private fun createMeeting(event: CachedEvent): RecentOneOnOneMeeting? {
+    private fun createMeeting(event: CachedEvent, jodaTZ: DateTimeZone): RecentOneOnOneMeeting? {
         // println("Creating meeting for ${event}")
         // Other
         val other = notMe(event.attendees) ?: return null
 
         // Return the meeting we are creating
-        val start = fromDateTime(event.start) ?: return null
+        val start = fromDateTime(event.start, jodaTZ) ?: return null
         val displayName = other.name ?: other.email
         return RecentOneOnOneMeeting(other.email, displayName, event.summary, start)
     }
@@ -145,11 +146,11 @@ class RecentOneOnOneBuilder {
      * based on date, not time.  eg., without this, at 11am you would see a 1pm event tomorrow as 1 day away
      * and then at 2pm you would see that 1pm event tomorrow as "today".
      */
-    private fun fromDateTime(start: CachedEventDateTime): ReadableInstant? {
+    private fun fromDateTime(start: CachedEventDateTime, jodaTZ: DateTimeZone): ReadableInstant? {
         var dateMaybeTime = start.dateTime
         if (dateMaybeTime == null) {
             dateMaybeTime = start.date
         }
-        return DateTime(dateMaybeTime!!.value).withTimeAtStartOfDay()
+        return DateTime(dateMaybeTime!!.value).toLocalDate().toDateTimeAtStartOfDay(jodaTZ)
     }
 }

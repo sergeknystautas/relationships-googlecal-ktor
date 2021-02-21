@@ -25,6 +25,7 @@ import org.joda.time.format.DateTimeFormat
 import io.sentry.Sentry
 import io.sentry.SentryOptions
 import io.sentry.protocol.User
+import org.joda.time.DateTimeZone
 
 
 /**
@@ -121,15 +122,19 @@ fun Application.module() {
 
             // Generate our main report
             model["rioter"] = rioter
-            val now = DateTime(System.currentTimeMillis())
-            val today = now.withTimeAtStartOfDay()
+            val tz = retrieveCalendarTZ(rioter)
 
-            val calendar = retrieveCalendar(rioter, now)
-            model["report"] = RecentOneOnOneBuilder().build(calendar.events, today)
+            val jodaTZ = DateTimeZone.forID(tz)
+            val now = DateTime(jodaTZ)
+            val today = now.toLocalDate().toDateTimeAtStartOfDay(jodaTZ)
+
+            val calendar = retrieveEvents(rioter, now, jodaTZ)
+            model["report"] = RecentOneOnOneBuilder().build(calendar.events, today, jodaTZ)
             model["now"] = now
             model["preparedFormatter"] = DateTimeFormat.forPattern("MMM d, yyyy h:mm a")
             model["formatter"] = DateTimeFormat.forPattern("EE, MMM d, yyyy")
             model["ago"] = DaysSince(today)
+            model["tz"] = jodaTZ.getName(now.millis)
 
             call.respond(VelocityContent("templates/showcalendar.vl", model))
 

@@ -5,6 +5,7 @@ import com.google.api.services.calendar.model.Event
 import com.google.api.services.calendar.model.EventAttendee
 import com.google.api.services.calendar.model.EventDateTime
 import kotlinx.serialization.Serializable
+import org.joda.time.DateTimeZone
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -12,7 +13,7 @@ import kotlin.collections.ArrayList
  * Information we need from a calendar
  */
 @Serializable
-data class CachedCalendar(val events: List<CachedEvent>)
+data class CachedCalendar(val events: List<CachedEvent>, val timeZone: String)
 
 /**
  * Information we need from an event.
@@ -78,7 +79,7 @@ data class CachedAttendee(val name: String?, val email: String, val responseStat
                           val self: Boolean, val resource: Boolean)
 
 class CachedCalendarBuilder {
-    fun createCalendar(gEvents: List<Event>): CachedCalendar {
+    fun createCalendar(gEvents: List<Event>, jodaTZ: DateTimeZone): CachedCalendar {
         val events = ArrayList<CachedEvent>()
         for (gEvent in gEvents) {
             if (gEvent.status != "cancelled" && gEvent.start != null) {
@@ -88,7 +89,7 @@ class CachedCalendarBuilder {
                 }
             }
         }
-        return CachedCalendar(events)
+        return CachedCalendar(events, jodaTZ.id)
     }
 
     fun createEvent(gEvent: Event): CachedEvent? {
