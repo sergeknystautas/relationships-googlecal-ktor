@@ -1,9 +1,9 @@
 # One on one tracker 
-This is the Kotlin rewrite of the one-on-one app report at https://github.com/sergeknystautas/relationships-googlecal.
+This is the Heroku/Kotlin rewrite of my prior [Docker/Java one-on-one app report](https://github.com/sergeknystautas/relationships-googlecal).
 
 This is hosted at https://riot-1on1s.herokuapp.com/.  The OAuth account is configured to only allow riotgames.com email addresses as it requires access to calendar and directory information.
 
-The app is functional and has some improvements over the original app, aside from also, actually working.  The remaining work and some ideas is in the [TODO](https://github.com/sergeknystautas/relationships-googlecal-ktor/blob/main/TODO) file and in Github's issue tracker https://github.com/sergeknystautas/relationships-googlecal-ktor/issues.
+The app is functional and has some improvements over the original app, aside from also, actually working.  The remaining work and some ideas is in the [TODO](https://github.com/sergeknystautas/relationships-googlecal-ktor/blob/main/TODO) file and in the project's [Github issue tracker](https://github.com/sergeknystautas/relationships-googlecal-ktor/issues).
 
 
 ## How to develop
