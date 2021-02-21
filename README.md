@@ -6,7 +6,7 @@ This is hosted at https://riot-1on1s.herokuapp.com/.  The OAuth account is confi
 The app is functional and has some improvements over the original app, aside from also, actually working.  The remaining work and some ideas is in the [TODO](https://github.com/sergeknystautas/relationships-googlecal-ktor/blob/main/TODO) file and in the project's [Github issue tracker](https://github.com/sergeknystautas/relationships-googlecal-ktor/issues).
 
 
-## How to develop
+## Development
 ### System requirements
 The versions here specifically work, though newer versions may also.
 * JDK 1.8 (aka Java 8, thanks Oracle) https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html
@@ -16,7 +16,7 @@ The versions here specifically work, though newer versions may also.
 * Either get Google account secrets from @sergeknystautas or create your own Google developer account for a web client and OAuth.
 * IntelliJ IDEA (recommended)
 
-### Run it
+### Run it locally
 
 Make sure you've got the above requirements complete.
 
@@ -32,8 +32,61 @@ This uses maven to clean previous artifacts and rebuild, then calls the heroku C
 
 ``http://localhost:5000``
 
+## Deployment
 
-## Why Heroku
+### Environments
+
+The (app.json)[https://github.com/sergeknystautas/relationships-googlecal-ktor/blob/main/app.json] adds the metadata and specifies we are using the heroku/java buildpack.
+
+The (Procfile)[https://github.com/sergeknystautas/relationships-googlecal-ktor/blob/main/Procfile] defines what Heroku runs.
+
+This app uses the (Heroku-20 stack)[https://devcenter.heroku.com/articles/heroku-20-stack].  By default the Java buildpack uses OpenJDK 8 and Maven 3.6.2 in this stack.
+
+### Branching strategy
+
+We follow a simple version of (git-flow)[https://nvie.com/posts/a-successful-git-branching-model/].
+* The production/live website at https://riot-1on1s.herokuapp.com/ is tied to the ``main`` branch.
+* The staging website at https://riot-1on1s-staging.herokuapp.com/ is tied to the ``staging`` branch.
+
+We are not using github-flow or the development and release branch strategy yet given the small size of the team.
+
+Email alerts on commits are configured in the (github project's notification settings)[https://github.com/sergeknystautas/relationships-googlecal-ktor/settings/notifications].
+
+### CI/CD
+
+We use Heroku for builds.  There are (two apps)[https://devcenter.heroku.com/articles/multiple-environments] for production and staging as described above in the branching strategy.
+
+Heroku uses a github webhook to be alerted when there are changes.  It runs the following command:
+
+``mvn -DskipTests clean dependency:list install``
+
+If this successfully completes, Heroku will shut down the existing dynos and launch one with the new version.  This will create a brief downtime for the app.  (Prebook)[https://devcenter.heroku.com/articles/preboot] is not available for the hobby level and we'd have to upgrade to professional to prevent this downtime.
+
+### Secrets
+
+Heroku manages secrets as discussed in development above.  These are the secrets the app uses that should be configured in a heroku app:
+
+* ``OAUTH_CLIENT_ID`` get this from Google
+* ``OAUTH_CLIENT_SECRET``  get this from Google
+* ``OAUTH_PROJECT`` get this from Google
+* ``SENTRY_ENVIRONMENT`` this is sent to Sentry on crash reports.  `development` is the default, also use `production` for that environment.
+* ``PAPERTRAIL_API_TOKEN`` configured automatically by heroku when adding this add-on.
+* ``SENTRY_DSN`` configured automatically by heroku when adding this add-on.
+
+### Logging
+
+We use the add-on from Papertrail that gives free cloud logging for Heroku deployed environments.  This is accessible thru an SSO link per project from the Heroku dashboard.
+
+### Alerting
+
+We use alerting in Papertrail to provide business-logic alerts.   The one alert in production is based on a saved search for SUCCESSFUL LOGIN log messages which if there are any are emailed nightly to Serge. 
+
+### Error reporting
+
+We use Sentry's crash reporting to track stack traces in the Kotlin app.  If the environment is specified, then an alert along with the user and URI path is sent to Sentry.  You can access the Sentry dashboard from an SSO link per project from the Heroku dashboard.
+
+## Why tech decisions
+### Why Heroku
 
 Heroku is a low-cost option for hosting hobby projects that provides many critical surrounding features that is more expensive and work with Docker and AWS, including:
 * Easy CI/CD 
@@ -47,11 +100,11 @@ Heroku is a low-cost option for hosting hobby projects that provides many critic
 
 All of this for $7/mo.
 
-## Why Kotlin
+### Why Kotlin
 
 If you fell in love with early Java's simplicity and ease of deployment, then watched Oracle turn it into bloated enterprise-ware, you'll love Kotlin.  Other languages do run within the JVM like Groovy or Scala, but they are typically used to solve other types of problems.  Kotlin gives the feel of clean, early Java but with 25 years of improved design patterns and simpler language syntax, plus easy access to all existing Java libraries.  Key improvements include concurrency, collection operations, error handling, null safety, and booleans.
 
-## Why other tech decisions
+### Why other tech decisions
 
 * Git because this is a microservice.
 * KTor because it wrapped Netty, gave OAuth options out of the box, gave numerous rendering options, and made it easy to start writing a Kotlin microservice.
