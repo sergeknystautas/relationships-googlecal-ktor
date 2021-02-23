@@ -16,11 +16,24 @@ Leverage your Google calendar to maintain good relationships.
 
 <h2>People</h2>
 
-#foreach ($person in $people.people)
-<p>
-$person
-</p>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Name</th>
+      <th scope="col">Email</th>
+      <th scope="col">Manager</th>
+    </tr>
+  </thead>
+  <tbody>
+#foreach ($person in $people)
+    <tr>
+      <td>#if ($person.displayName) $person.displayName #else <i>N/A</i>#end</td>
+      <td>$person.emailAddress</td>
+      <td>#if ($person.managerEmail) $person.managerEmail #else <i>N/A</i>#end</td>
+    </tr>
 #end
+  </tbody>
+</table>
 
         </div>
 

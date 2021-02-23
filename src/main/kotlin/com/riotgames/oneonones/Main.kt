@@ -156,7 +156,7 @@ fun Application.module() {
             val people = retrievePeople(rioter)
 
             val model = mutableMapOf<String, Any>()
-            model["people"] = people
+            model["people"] = people.people.sortedBy{it.emailAddress}
             call.respond(VelocityContent("templates/people.vl", model))
         }
 

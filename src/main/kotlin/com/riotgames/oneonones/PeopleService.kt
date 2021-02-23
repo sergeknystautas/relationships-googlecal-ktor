@@ -1,12 +1,12 @@
 package com.riotgames.oneonones
 
-import com.google.api.services.calendar.model.Event
+import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.services.people.v1.PeopleService
-import com.google.api.services.people.v1.model.Person
+import kotlinx.coroutines.delay
 import java.util.ArrayList
 
 
-fun retrievePeople(rioter: MyRioterInfo): CachedPeople {
+suspend fun retrievePeople(rioter: MyRioterInfo): CachedPeople {
 
     val credential = CREDENTIAL_BUILDER.build().setAccessToken(rioter.accessToken).setRefreshToken(rioter.refreshToken)
 
@@ -27,53 +27,77 @@ fun retrievePeople(rioter: MyRioterInfo): CachedPeople {
 
     val people: MutableMap<String, CachedPerson> = HashMap()
     var page: String? = null
+    // How many seconds to delay on a 429
+    var backoff = 1
     while (true) {
         println("calling with token $page")
 
-        val directory = service.people().listDirectoryPeople()
-            .setPageSize(1000)
-            .setReadMask(mask)
-            .setSources(sources)
-            .setPageToken(page).execute()
-        val morePeople = directory.people
+        try {
+            val directory = service.people().listDirectoryPeople()
+                .setPageSize(1000)
+                .setReadMask(mask)
+                .setSources(sources)
+                .setPageToken(page).execute()
 
-        people.putAll(directory.people.map{ it.resourceName to CachedPerson(it) }.toMap())
+            people.putAll(directory.people.map { it.resourceName to CachedPerson(it) }.toMap())
 
-        page = directory.nextPageToken
+            page = directory.nextPageToken
+        } catch (e: GoogleJsonResponseException) {
+            if (e.statusCode == 429) {
+                // oof need to retry
+                backoff *= 2
+                println("Delaying $backoff for 429s...")
+                delay(1000L * backoff)
+                continue
+            } else {
+                throw e
+            }
+        }
+        backoff = 1
         if (page == null) {
             break
         }
     }
 
-    people.keys.toList().chunked(50).forEach { resourceNames ->
-        val details = service.people().batchGet
-            //.setPersonFields("relations,names,organizations,metadata")
-            .setPersonFields("names,organizations,relations")
-            .setResourceNames(resourceNames).execute()
+    println("Downloaded ${people.size} people from the directory")
 
-        details.responses.forEach {
-            val resourceName = it.person.resourceName
-            val person = people[resourceName]
-            person?.apply(it)
+    people.keys.toList().chunked(50).forEach { resourceNames ->
+        while (true) {
+            try {
+                val details = service.people().batchGet
+                    //.setPersonFields("relations,names,organizations,metadata")
+                    .setPersonFields("names,organizations,relations")
+                    .setResourceNames(resourceNames).execute()
+
+                details.responses.forEach {
+                    val resourceName = it.person.resourceName
+                    val person = people[resourceName]
+                    person?.apply(it)
+                }
+            } catch (e: GoogleJsonResponseException) {
+                if (e.statusCode == 429) {
+                    // oof need to retry
+                    backoff *= 2
+                    println("Delaying $backoff for 429s...")
+                    delay(1000L * backoff)
+                    continue
+                } else {
+                    throw e
+                }
+            }
+            backoff = 1
+            break
         }
     }
 
+    // println(people.values)
+
+    /*
     people.values.filter { it.managerEmail != null && it.displayName == null}
         .forEach {
         println()
     }
-
-    // Ugh now I have to mess with this.
-    /*
-    val emailAddresses = directory.people.map{ it.resourceName to it.emailAddresses[0].value }
-    val names = people.responses.map{ it.person.resourceName to it.person.names?.get(0)?.displayName }
-    val managers = people.responses.map{ it.person.resourceName to it.person.relations?.get(0)?.person}
-
-    println(emailAddresses)
-    println(names)
-    println(managers)
     */
 
-
-    return CachedPeople(ArrayList<CachedPerson>())
+    return CachedPeople(people.values.toList())
 }
