@@ -1,6 +1,7 @@
 package com.riotgames.oneonones
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
+import com.google.api.services.people.v1.PeopleService
 import com.google.gson.reflect.TypeToken
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -26,6 +27,10 @@ import io.sentry.Sentry
 import io.sentry.SentryOptions
 import io.sentry.protocol.User
 import org.joda.time.DateTimeZone
+import java.util.ArrayList
+
+
+
 
 
 /**
@@ -140,6 +145,21 @@ fun Application.module() {
 
         }
 
+        get("/people") {
+            val session = call.sessions.get<MyRioterUid>()
+            val rioter = session?.let { it1 -> loadRioterInfo(it1.uid) }
+            if (rioter == null) {
+                call.respondRedirect("/logout", permanent = false)
+                return@get
+            }
+
+            val people = retrievePeople(rioter)
+
+            val model = mutableMapOf<String, Any>()
+            model["people"] = people
+            call.respond(VelocityContent("templates/people.vl", model))
+        }
+
         // URL that always crashes to manually test error handling.
         get("/testerror") {
             throw RuntimeException("Manually created error")
@@ -201,7 +221,7 @@ fun Application.module() {
                     // Save this in the user's session to persist
                     call.sessions.set(MyRioterUid(uid))
 
-                    call.respondRedirect("/")
+                    call.respondRedirect("/people")
                 }
             }
         }

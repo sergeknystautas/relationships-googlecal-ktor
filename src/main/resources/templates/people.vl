@@ -1,0 +1,32 @@
+#parse("templates/header.vl")
+
+<main role="main">
+
+  <section class="jumbotron">
+    <div class="container">
+
+      <div class="row">
+        <div class="col">
+
+
+<h1>Relationship building</h1>
+<p>
+Leverage your Google calendar to maintain good relationships.
+</p>
+
+<h2>People</h2>
+
+#foreach ($person in $people.people)
+<p>
+$person
+</p>
+#end
+
+        </div>
+
+    </div>
+  </section>
+
+</main>
+
+#parse("templates/footer.vl")
