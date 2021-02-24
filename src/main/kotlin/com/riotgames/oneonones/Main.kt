@@ -122,14 +122,17 @@ fun Application.module() {
 
             // Generate our main report
             model["rioter"] = rioter
-            val tz = retrieveCalendarTZ(rioter)
 
+            val calendar = loadCalendar(rioter)
+
+            val tz = retrieveCalendarTZ(rioter)
             val jodaTZ = DateTimeZone.forID(tz)
             val now = DateTime(jodaTZ)
             val today = now.toLocalDate().toDateTimeAtStartOfDay(jodaTZ)
 
-            val calendar = retrieveEvents(rioter, now, jodaTZ)
-            model["report"] = RecentOneOnOneBuilder().build(calendar.events, today, jodaTZ)
+            if (calendar != null) {
+                model["report"] = RecentOneOnOneBuilder().build(calendar.events, today, jodaTZ)
+            }
             model["now"] = now
             model["preparedFormatter"] = DateTimeFormat.forPattern("MMM d, yyyy h:mm a")
             model["formatter"] = DateTimeFormat.forPattern("EE, MMM d, yyyy")
