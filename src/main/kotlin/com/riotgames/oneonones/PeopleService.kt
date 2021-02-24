@@ -2,10 +2,32 @@ package com.riotgames.oneonones
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.services.people.v1.PeopleService
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import java.util.ArrayList
 
 
+var peopleCacheLoader: Job? = null
+var peopleCache: CachedPeople? = null
+
+
+/**
+ * Gets a reference to people, if we haven't tried yet, start a job to download.
+ */
+fun loadPeople(rioter: MyRioterInfo): CachedPeople? {
+    runBlocking {
+        if (peopleCache == null && peopleCacheLoader == null) {
+            println("peopleLoader is null")
+            peopleCacheLoader = GlobalScope.launch {
+                peopleCache = retrievePeople(rioter)
+            }
+        }
+    }
+    return peopleCache
+}
+
+/**
+ * Calls the Google People API to retrieve profile data and create cached objects based on that.
+ */
 suspend fun retrievePeople(rioter: MyRioterInfo): CachedPeople {
 
     val credential = CREDENTIAL_BUILDER.build().setAccessToken(rioter.accessToken).setRefreshToken(rioter.refreshToken)
@@ -63,6 +85,7 @@ suspend fun retrievePeople(rioter: MyRioterInfo): CachedPeople {
 
     people.keys.toList().chunked(50).forEach { resourceNames ->
         while (true) {
+            // println("Grabbing deets for another ${resourceNames.size}")
             try {
                 val details = service.people().batchGet
                     //.setPersonFields("relations,names,organizations,metadata")
@@ -90,7 +113,7 @@ suspend fun retrievePeople(rioter: MyRioterInfo): CachedPeople {
         }
     }
 
-    // println(people.values)
+    // println("Processed ${people.size} profiles")
 
     /*
     people.values.filter { it.managerEmail != null && it.displayName == null}

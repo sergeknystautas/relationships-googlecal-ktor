@@ -1,7 +1,6 @@
 package com.riotgames.oneonones
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
-import com.google.api.services.people.v1.PeopleService
 import com.google.gson.reflect.TypeToken
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -27,11 +26,6 @@ import io.sentry.Sentry
 import io.sentry.SentryOptions
 import io.sentry.protocol.User
 import org.joda.time.DateTimeZone
-import java.util.ArrayList
-
-
-
-
 
 /**
  * Configures the webserver and does routing.
@@ -153,10 +147,11 @@ fun Application.module() {
                 return@get
             }
 
-            val people = retrievePeople(rioter)
-
             val model = mutableMapOf<String, Any>()
-            model["people"] = people.people.sortedBy{it.emailAddress}
+            val localPeople = loadPeople(rioter)
+            if (localPeople != null) {
+                model["people"] = localPeople.people.sortedBy { it.emailAddress }
+            }
             call.respond(VelocityContent("templates/people.vl", model))
         }
 

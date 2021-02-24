@@ -16,6 +16,7 @@ Leverage your Google calendar to maintain good relationships.
 
 <h2>People</h2>
 
+#if ($people)
 <table class="table">
   <thead>
     <tr>
@@ -34,7 +35,9 @@ Leverage your Google calendar to maintain good relationships.
 #end
   </tbody>
 </table>
-
+#else
+<p>We are still loading the people data</p>
+#end
         </div>
 
     </div>
