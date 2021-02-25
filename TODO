@@ -5,13 +5,11 @@ These have been moved to https://github.com/sergeknystautas/relationships-google
 
 IMPROVEMENTS (make what is there, better)
 - Store sessions in redis instead of local file system (https://devcenter.heroku.com/articles/heroku-redis and https://redislabs.com/lp/redis-java/)
-- Use the time zone from the calendar to show everything in that.
-- Put calendar time zone next to face.
 - Highlight what is a recurring meeting (or if you do with this individual)
 - Cache the calendar data somewhere (redis or mysql?).  Store when the calendar was last updated, store the sync token, and use that for faster queries to update what is cached.
 
 ENHANCEMENTS (take this in new directions)
 - In discussing the way I use the report, it'd be good to split this report into different sections and give guidance on the why.
 - Use the people API/user directory to find your reports.  Show that on the existing report and add a new report to show my reports and manager and if I have recurring events.
-
+- Export reports to Google sheets https://developers.google.com/sheets/api/guides/create#java
 
