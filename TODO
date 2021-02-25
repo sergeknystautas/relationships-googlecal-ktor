@@ -7,6 +7,8 @@ IMPROVEMENTS (make what is there, better)
 - Store sessions in redis instead of local file system (https://devcenter.heroku.com/articles/heroku-redis and https://redislabs.com/lp/redis-java/)
 - Highlight what is a recurring meeting (or if you do with this individual)
 - Cache the calendar data somewhere (redis or mysql?).  Store when the calendar was last updated, store the sync token, and use that for faster queries to update what is cached.
+- Show a report per person to see all of the 1on1s you've had with someone
+- Link to a person's profile from their report
 
 ENHANCEMENTS (take this in new directions)
 - In discussing the way I use the report, it'd be good to split this report into different sections and give guidance on the why.
