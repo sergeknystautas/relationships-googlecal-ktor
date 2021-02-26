@@ -13,5 +13,9 @@
       content="Relationship building thru one-on-ones"
     />
     <title>One-on-ones</title>
+    #if ($refresh)
+      ## Yes I'm old
+      <meta http-equiv="refresh" content="3">
+    #end
   </head>
   <body style="background-color: #acb5bd">

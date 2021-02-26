@@ -27,6 +27,8 @@ import io.sentry.SentryOptions
 import io.sentry.protocol.User
 import org.joda.time.DateTimeZone
 
+val ENVIRONMENT = System.getenv("ENVIRONMENT") ?: "development"
+
 /**
  * Configures the webserver and does routing.
  */
@@ -43,8 +45,17 @@ fun Application.module() {
         //   exceptions to Sentry will be ignored.
         Sentry.init { options: SentryOptions ->
             options.dsn = System.getenv("SENTRY_DSN")
-            options.environment = System.getenv("SENTRY_ENVIRONMENT") ?: "development"
+            options.environment = ENVIRONMENT
         }
+    }
+    // Make sure you are sent to https
+    install(HttpsRedirect) {
+        // The port to redirect to. By default 443, the default HTTPS port.
+        sslPort = 443
+        // 301 Moved Permanently, or 302 Found redirect.
+        permanentRedirect = true
+        // Exclude local development
+        exclude { call -> call.request.header("X-Forwarded-Proto") == "https" || ENVIRONMENT == "development" }
     }
     // Because Heroku, we want to add this header support.
     install(XForwardedHeaderSupport)
@@ -121,16 +132,21 @@ fun Application.module() {
 
             // Generate our main report
             model["rioter"] = rioter
-            val tz = retrieveCalendarTZ(rioter)
 
+            val calendar = loadCalendar(rioter)
+
+            val tz = retrieveCalendarTZ(rioter)
             val jodaTZ = DateTimeZone.forID(tz)
             val now = DateTime(jodaTZ)
             val today = now.toLocalDate().toDateTimeAtStartOfDay(jodaTZ)
 
-            val calendar = retrieveEvents(rioter, now, jodaTZ)
-            model["report"] = RecentOneOnOneBuilder().build(calendar.events, today, jodaTZ)
-            model["now"] = now
-            model["preparedFormatter"] = DateTimeFormat.forPattern("MMM d, yyyy h:mm a")
+            if (calendar != null) {
+                model["report"] = RecentOneOnOneBuilder().build(calendar.events, today, jodaTZ)
+                model["updated"] = DateTime(calendar.updated, jodaTZ)
+            } else {
+                model["refresh"] = "yes"
+            }
+            model["updatedFormatter"] = DateTimeFormat.forPattern("MMM d, yyyy h:mm a")
             model["formatter"] = DateTimeFormat.forPattern("EE, MMM d, yyyy")
             model["ago"] = DaysSince(today)
             model["tz"] = jodaTZ.getName(now.millis)
@@ -240,7 +256,7 @@ private suspend fun displayError(call: ApplicationCall, cause: Throwable, printS
             // scope.transaction = "main"
             // scope.setContexts()
             scope.user = user
-            scope.setTag("environment", "protuction")
+            scope.setTag("environment", ENVIRONMENT)
             scope.removeTag("server_name")
             scope.setTag("uri", call.request.path())
 
