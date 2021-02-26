@@ -167,6 +167,8 @@ fun Application.module() {
             val localPeople = loadPeople(rioter)
             if (localPeople != null) {
                 model["people"] = localPeople.people.sortedBy { it.emailAddress }
+            } else {
+                model["refresh"] = "yes"
             }
             call.respond(VelocityContent("templates/people.vl", model))
         }
