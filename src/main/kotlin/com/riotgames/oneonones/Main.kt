@@ -27,6 +27,7 @@ import io.sentry.SentryOptions
 import io.sentry.protocol.User
 import org.joda.time.DateTimeZone
 
+val ENVIRONMENT = System.getenv("ENVIRONMENT") ?: "development"
 
 /**
  * Configures the webserver and does routing.
@@ -44,7 +45,7 @@ fun Application.module() {
         //   exceptions to Sentry will be ignored.
         Sentry.init { options: SentryOptions ->
             options.dsn = System.getenv("SENTRY_DSN")
-            options.environment = System.getenv("SENTRY_ENVIRONMENT") ?: "development"
+            options.environment = ENVIRONMENT
         }
     }
     // Make sure you are sent to https
@@ -54,7 +55,7 @@ fun Application.module() {
         // 301 Moved Permanently, or 302 Found redirect.
         permanentRedirect = true
         // Exclude local development
-        exclude { call -> call.request.header("X-Forwarded-Proto") == null }
+        exclude { ENVIRONMENT == "development" }
     }
     // Because Heroku, we want to add this header support.
     install(XForwardedHeaderSupport)
@@ -237,7 +238,7 @@ private suspend fun displayError(call: ApplicationCall, cause: Throwable, printS
             // scope.transaction = "main"
             // scope.setContexts()
             scope.user = user
-            scope.setTag("environment", "protuction")
+            scope.setTag("environment", ENVIRONMENT)
             scope.removeTag("server_name")
             scope.setTag("uri", call.request.path())
 

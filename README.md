@@ -69,7 +69,7 @@ Heroku manages secrets as discussed in development above.  These are the secrets
 * ``OAUTH_CLIENT_ID`` get this from Google
 * ``OAUTH_CLIENT_SECRET``  get this from Google
 * ``OAUTH_PROJECT`` get this from Google
-* ``SENTRY_ENVIRONMENT`` this is sent to Sentry on crash reports.  `development` is the default, also use `production` for that environment.
+* ``ENVIRONMENT`` this prompts HTTPS redirects in production and is sent to Sentry on crash reports.  `development` is the default, also use `production` for that environment.
 * ``PAPERTRAIL_API_TOKEN`` configured automatically by heroku when adding this add-on.
 * ``SENTRY_DSN`` configured automatically by heroku when adding this add-on.
 
