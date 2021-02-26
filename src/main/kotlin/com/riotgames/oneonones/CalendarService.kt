@@ -2,6 +2,10 @@ package com.riotgames.oneonones
 
 import com.google.api.services.calendar.Calendar
 import com.google.api.services.calendar.model.Event
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.joda.time.DateTime
@@ -12,8 +16,32 @@ import java.nio.charset.StandardCharsets.UTF_8
 import java.util.ArrayList
 import java.util.zip.GZIPOutputStream
 
+var calendarCacheLoader = HashMap<String, Job>()
+var calendarCache= HashMap<String, CachedCalendar>()
 
-fun retrieveCalendarTZ(rioter: MyRioterInfo): String {
+/**
+ * Gets a reference to people, if we haven't tried yet, start a job to download.
+ */
+fun loadCalendar(rioter: MyRioterInfo): CachedCalendar? {
+    runBlocking {
+        if (calendarCache[rioter.uid] == null && calendarCacheLoader[rioter.uid] == null) {
+            println("calendarLoader for ${rioter.uid} is null")
+            calendarCacheLoader[rioter.uid] = GlobalScope.launch {
+                calendarCache[rioter.uid] = retrieveCalendar(rioter)
+            }
+        }
+    }
+    return calendarCache[rioter.uid]
+}
+
+suspend fun retrieveCalendar(rioter: MyRioterInfo): CachedCalendar {
+    var tz = retrieveCalendarTZ(rioter)
+    val jodaTZ = DateTimeZone.forID(tz)
+    val now = DateTime(jodaTZ)
+    return retrieveEvents(rioter, now, jodaTZ)
+}
+
+suspend fun retrieveCalendarTZ(rioter: MyRioterInfo): String {
     val credential = CREDENTIAL_BUILDER.build().setAccessToken(rioter.accessToken).setRefreshToken(rioter.refreshToken)
     // TODO - when token refreshing works, do that
     val service = Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(projectName).build()
@@ -27,7 +55,7 @@ fun retrieveCalendarTZ(rioter: MyRioterInfo): String {
  * in normal operation.  This transforms the Google API objects into condensed and serializable cache objects
  * defined in CalendarCache.kt.
  */
-fun retrieveEvents(rioter: MyRioterInfo, now: DateTime, jodaTZ: DateTimeZone): CachedCalendar {
+suspend fun retrieveEvents(rioter: MyRioterInfo, now: DateTime, jodaTZ: DateTimeZone): CachedCalendar {
     val credential = CREDENTIAL_BUILDER.build().setAccessToken(rioter.accessToken).setRefreshToken(rioter.refreshToken)
 
     // TODO This doesn't work yet, so commenting it out but if can get the refresh token, can see if this works.
@@ -49,6 +77,7 @@ fun retrieveEvents(rioter: MyRioterInfo, now: DateTime, jodaTZ: DateTimeZone): C
 
     val items: MutableList<Event> = ArrayList()
     var page: String? = null
+    var updated: Long? = null
     while (true) {
         println("calling with token $page")
         val events = service.events().list("primary").setMaxResults(500)
@@ -57,6 +86,9 @@ fun retrieveEvents(rioter: MyRioterInfo, now: DateTime, jodaTZ: DateTimeZone): C
             .setPageToken(page).execute()
         val moreItems = events.items
         items.addAll(moreItems)
+        updated = events.updated.value
+        // TODO - remember and use sync token to make follow-on calls
+        // events.nextSyncToken
         page = events.nextPageToken
         if (page == null) {
             break
@@ -69,7 +101,7 @@ fun retrieveEvents(rioter: MyRioterInfo, now: DateTime, jodaTZ: DateTimeZone): C
         // // debug("We updated ${rioter.given_name}'s oauth credentials!")
     // }
 
-    val calendarCache = calendarBuilder.createCalendar(items, jodaTZ)
+    val calendarCache = calendarBuilder.createCalendar(updated!!, items, jodaTZ)
 
     val json = Json.encodeToString(calendarCache)
     println("Json is ${json.length} long for ${items.size} events")
