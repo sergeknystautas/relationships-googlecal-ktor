@@ -47,6 +47,15 @@ fun Application.module() {
             options.environment = System.getenv("SENTRY_ENVIRONMENT") ?: "development"
         }
     }
+    // Make sure you are sent to https
+    install(HttpsRedirect) {
+        // The port to redirect to. By default 443, the default HTTPS port.
+        sslPort = 443
+        // 301 Moved Permanently, or 302 Found redirect.
+        permanentRedirect = true
+        // Exclude local development
+        exclude { call -> call.request.port() == 5000 }
+    }
     // Because Heroku, we want to add this header support.
     install(XForwardedHeaderSupport)
     // Basic HTTP improvements
