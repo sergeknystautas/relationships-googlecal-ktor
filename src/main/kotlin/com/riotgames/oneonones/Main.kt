@@ -142,11 +142,11 @@ fun Application.module() {
 
             if (calendar != null) {
                 model["report"] = RecentOneOnOneBuilder().build(calendar.events, today, jodaTZ)
+                model["updated"] = DateTime(calendar.updated, jodaTZ)
             } else {
                 model["refresh"] = "yes"
             }
-            model["now"] = now
-            model["preparedFormatter"] = DateTimeFormat.forPattern("MMM d, yyyy h:mm a")
+            model["updatedFormatter"] = DateTimeFormat.forPattern("MMM d, yyyy h:mm a")
             model["formatter"] = DateTimeFormat.forPattern("EE, MMM d, yyyy")
             model["ago"] = DaysSince(today)
             model["tz"] = jodaTZ.getName(now.millis)

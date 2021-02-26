@@ -77,6 +77,7 @@ suspend fun retrieveEvents(rioter: MyRioterInfo, now: DateTime, jodaTZ: DateTime
 
     val items: MutableList<Event> = ArrayList()
     var page: String? = null
+    var updated: Long? = null
     while (true) {
         println("calling with token $page")
         val events = service.events().list("primary").setMaxResults(500)
@@ -85,6 +86,9 @@ suspend fun retrieveEvents(rioter: MyRioterInfo, now: DateTime, jodaTZ: DateTime
             .setPageToken(page).execute()
         val moreItems = events.items
         items.addAll(moreItems)
+        updated = events.updated.value
+        // TODO - remember and use sync token to make follow-on calls
+        // events.nextSyncToken
         page = events.nextPageToken
         if (page == null) {
             break
@@ -97,7 +101,7 @@ suspend fun retrieveEvents(rioter: MyRioterInfo, now: DateTime, jodaTZ: DateTime
         // // debug("We updated ${rioter.given_name}'s oauth credentials!")
     // }
 
-    val calendarCache = calendarBuilder.createCalendar(items, jodaTZ)
+    val calendarCache = calendarBuilder.createCalendar(updated!!, items, jodaTZ)
 
     val json = Json.encodeToString(calendarCache)
     println("Json is ${json.length} long for ${items.size} events")

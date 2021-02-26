@@ -9,7 +9,9 @@
         <div class="col-10">
           <h1 class="jumbotron-heading">One on one tracker</h1>
           <p class="lead text-muted">This leverages your Google calendar to maintain relationships.  It will show the next time you will meet with people, either today or in the near future.  You might want to schedule a 1on1 with people who you last met <i>days ago</i> as you have nothing planned.</p>
-          <p class="text-muted">Prepared ${now.toString($preparedFormatter)}, ${tz}</p>
+          #if ($updated)
+          <p class="text-muted">Calendar last updated at ${updated.toString($updatedFormatter)}, ${tz}</p>
+          #end
         </div>
         <div class="col-2">
           <p class="text-muted">
