@@ -54,7 +54,7 @@ fun Application.module() {
         // 301 Moved Permanently, or 302 Found redirect.
         permanentRedirect = true
         // Exclude local development
-        exclude { call -> call.request.port() == 5000 }
+        exclude { call -> call.request.header("X-Forwarded-Proto") == null }
     }
     // Because Heroku, we want to add this header support.
     install(XForwardedHeaderSupport)
