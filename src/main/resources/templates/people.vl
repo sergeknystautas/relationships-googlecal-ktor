@@ -36,7 +36,10 @@ Leverage your Google calendar to maintain good relationships.
   </tbody>
 </table>
 #else
-<p>We are still loading the people data</p>
+  <p>We are still loading the people data</p>
+  <div class="progress">
+    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+  </div>
 #end
         </div>
 

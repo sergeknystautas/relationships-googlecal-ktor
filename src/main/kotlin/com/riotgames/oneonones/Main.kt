@@ -234,7 +234,7 @@ fun Application.module() {
                     // Save this in the user's session to persist
                     call.sessions.set(MyRioterUid(uid))
 
-                    call.respondRedirect("/people")
+                    call.respondRedirect("/")
                 }
             }
         }

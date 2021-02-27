@@ -4,19 +4,49 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.services.people.v1.PeopleService
 import kotlinx.coroutines.*
 import java.util.ArrayList
+import kotlin.NullPointerException
 
-
+// This is just the directory information without metadata
+var directoryCacheLoader: Job? = null
+var directoryCache: CachedPeople? = null
+// This includes the people metadata such as manager and name
 var peopleCacheLoader: Job? = null
 var peopleCache: CachedPeople? = null
 
+/*
+ Relevant fields for People API
+ emailAddresses - to map the person to our calendar data
+ relations - the manager
+ organizations - what department???
+ XXX names - not as clear
+ metadata - sources/profileMetadata/objectType = PERSON, so not a group or resource (I think)
+*/
+
+/**
+ * Gets a reference to directory, if we haven't tried yet, start a job to download.
+ */
+fun loadDirectory(rioter: MyRioterInfo): CachedPeople? {
+    runBlocking {
+        if (directoryCache == null && directoryCacheLoader == null) {
+            println("directoryLoader is null")
+            directoryCacheLoader = GlobalScope.launch {
+                directoryCache = retrieveDirectory(rioter)
+            }
+        }
+    }
+    return directoryCache
+}
 
 /**
  * Gets a reference to people, if we haven't tried yet, start a job to download.
  */
 fun loadPeople(rioter: MyRioterInfo): CachedPeople? {
     runBlocking {
-        if (peopleCache == null && peopleCacheLoader == null) {
+        // If the directory is available
+        // And we have no people cache and the loading of that hasn't started
+        if (loadDirectory(rioter) != null && peopleCache == null && peopleCacheLoader == null) {
             println("peopleLoader is null")
+            // Start loading the people
             peopleCacheLoader = GlobalScope.launch {
                 peopleCache = retrievePeople(rioter)
             }
@@ -25,10 +55,12 @@ fun loadPeople(rioter: MyRioterInfo): CachedPeople? {
     return peopleCache
 }
 
+
+
 /**
- * Calls the Google People API to retrieve profile data and create cached objects based on that.
+ * Calls the Google People API directory to retrieve profile data and create cached objects based on that.
  */
-suspend fun retrievePeople(rioter: MyRioterInfo): CachedPeople {
+suspend fun retrieveDirectory(rioter: MyRioterInfo): CachedPeople {
 
     val credential = CREDENTIAL_BUILDER.build().setAccessToken(rioter.accessToken).setRefreshToken(rioter.refreshToken)
 
@@ -40,12 +72,6 @@ suspend fun retrievePeople(rioter: MyRioterInfo): CachedPeople {
     // sources.add("DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT")
     sources.add("DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE")
     val mask = "organizations,emailAddresses"
-    // emailAddresses - to map the person to our calendar data
-    // relations - the manager
-    // organizations - what department???
-    // XXX names - not as clear
-    // metadata - sources/profileMetadata/objectType = PERSON, so not a group or resource (I think)
-
 
     val people: MutableMap<String, CachedPerson> = HashMap()
     var page: String? = null
@@ -83,6 +109,35 @@ suspend fun retrievePeople(rioter: MyRioterInfo): CachedPeople {
 
     println("Downloaded ${people.size} people from the directory")
 
+    return CachedPeople(people.values.toList())
+}
+
+
+/**
+ * Calls the Google People API to retrieve profile data and create cached objects based on that.
+ */
+suspend fun retrievePeople(rioter: MyRioterInfo): CachedPeople {
+
+    val credential = CREDENTIAL_BUILDER.build().setAccessToken(rioter.accessToken).setRefreshToken(rioter.refreshToken)
+
+    val service = PeopleService.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
+        .setApplicationName(projectName)
+        .build()
+
+    val directory = loadDirectory(rioter)
+        ?: throw NullPointerException("Directory is not yet loaded, this should not be possible to call")
+    val people: MutableMap<String, CachedPerson> = HashMap()
+    // Take the directory info as the starting point for people
+    people.putAll(directory.people.map { it.id to it }.toMap())
+
+    // I think I just want the profile not the contacts, but it's not well documented.
+    val sources = ArrayList<String>()
+    // sources.add("DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT")
+    sources.add("DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE")
+
+    // How many seconds to delay on a 429
+    var backoff = 1
+
     people.keys.toList().chunked(50).forEach { resourceNames ->
         while (true) {
             // println("Grabbing deets for another ${resourceNames.size}")
@@ -112,15 +167,6 @@ suspend fun retrievePeople(rioter: MyRioterInfo): CachedPeople {
             break
         }
     }
-
-    // println("Processed ${people.size} profiles")
-
-    /*
-    people.values.filter { it.managerEmail != null && it.displayName == null}
-        .forEach {
-        println()
-    }
-    */
 
     return CachedPeople(people.values.toList())
 }
