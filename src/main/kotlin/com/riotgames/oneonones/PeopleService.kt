@@ -32,6 +32,8 @@ fun loadDirectory(rioter: MyRioterInfo): CachedPeople? {
             directoryCacheLoader = GlobalScope.launch {
                 directoryCache = retrieveDirectory(rioter)
             }
+        } else if (directoryCacheLoader?.isCompleted == true) {
+            directoryCacheLoader == null
         }
     }
     return directoryCache
@@ -50,6 +52,8 @@ fun loadPeople(rioter: MyRioterInfo): CachedPeople? {
             peopleCacheLoader = GlobalScope.launch {
                 peopleCache = retrievePeople(rioter)
             }
+        } else if (peopleCacheLoader?.isCompleted == true) {
+            peopleCacheLoader = null
         }
     }
     return peopleCache
