@@ -23,7 +23,7 @@ class RecentOneOnOneBuilder {
      * Build the report based on the list of cached events and as of a point in time handed, assumed to be
      * now or today in normal operation.
      */
-    fun build(events: List<CachedEvent>, today: ReadableInstant, jodaTZ: DateTimeZone): RecentOneOnOneReport {
+    fun build(events: List<CachedEvent>, today: ReadableInstant, jodaTZ: DateTimeZone, people: List<CachedPerson>): RecentOneOnOneReport {
 
         val latestOneOnOnes: MutableMap<String, RecentOneOnOneMeeting> = HashMap<String, RecentOneOnOneMeeting>()
 
@@ -37,8 +37,11 @@ class RecentOneOnOneBuilder {
             updateMeeting(latestOneOnOnes, meeting, today)
         }
 
+        // Let's filter people who are not in the directory
+        val emails = people.map { it.emailAddress }
+        val meetings = latestOneOnOnes.values.filter { emails.contains(it.email) }.toMutableList()
+
         // Let's sort the meetings now, well, seems like we don't really need to.
-        val meetings: MutableList<RecentOneOnOneMeeting> = ArrayList(latestOneOnOnes.values)
         meetings.sort()
 
         return RecentOneOnOneReport(meetings)

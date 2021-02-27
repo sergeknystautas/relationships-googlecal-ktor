@@ -134,14 +134,15 @@ fun Application.module() {
             model["rioter"] = rioter
 
             val calendar = loadCalendar(rioter)
+            val directory = loadDirectory(rioter)
 
             val tz = retrieveCalendarTZ(rioter)
             val jodaTZ = DateTimeZone.forID(tz)
             val now = DateTime(jodaTZ)
             val today = now.toLocalDate().toDateTimeAtStartOfDay(jodaTZ)
 
-            if (calendar != null) {
-                model["report"] = RecentOneOnOneBuilder().build(calendar.events, today, jodaTZ)
+            if (calendar != null && directory != null) {
+                model["report"] = RecentOneOnOneBuilder().build(calendar.events, today, jodaTZ, directory.people)
                 model["updated"] = DateTime(calendar.updated, jodaTZ)
             } else {
                 model["refresh"] = "yes"
