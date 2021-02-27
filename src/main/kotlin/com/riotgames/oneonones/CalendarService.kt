@@ -29,6 +29,11 @@ suspend fun loadCalendar(rioter: MyRioterInfo): CachedCalendar? {
             calendarCacheLoader[rioter.uid] = GlobalScope.launch {
                 calendarCache[rioter.uid] = retrieveCalendar(rioter)
             }
+        } else {
+            // Trying to debug when there was an exception and might need to clear the loader
+            println("cache is null? " + (calendarCache[rioter.uid] == null)
+                    + " and is completed? " + calendarCacheLoader[rioter.uid]?.isCompleted
+                    + " and is active? " + calendarCacheLoader[rioter.uid]?.isActive)
         }
     }
     var calendar = calendarCache[rioter.uid]
