@@ -4,6 +4,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
+import com.google.api.services.people.v1.PeopleServiceScopes
 import io.ktor.auth.*
 import io.ktor.http.*
 
@@ -44,6 +45,7 @@ val googleOauthProvider = OAuthServerSettings.OAuth2ServerSettings(
         "email", // email
         "https://www.googleapis.com/auth/calendar.readonly", // google calendar
         "https://www.googleapis.com/auth/admin.directory.user.readonly" // user directory
+    , PeopleServiceScopes.CONTACTS_READONLY, PeopleServiceScopes.DIRECTORY_READONLY
     )
 )
 

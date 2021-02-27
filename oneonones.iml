@@ -48,6 +48,7 @@
     <orderEntry type="library" name="Maven: com.google.oauth-client:google-oauth-client-jetty:1.31.2" level="project" />
     <orderEntry type="library" name="Maven: com.google.oauth-client:google-oauth-client-java6:1.31.2" level="project" />
     <orderEntry type="library" name="Maven: com.google.apis:google-api-services-calendar:v3-rev347-1.25.0" level="project" />
+    <orderEntry type="library" name="Maven: com.google.apis:google-api-services-people:v1-rev20210218-1.31.0" level="project" />
     <orderEntry type="library" name="Maven: com.google.http-client:google-http-client-gson:1.38.1" level="project" />
     <orderEntry type="library" name="Maven: com.google.http-client:google-http-client:1.38.1" level="project" />
     <orderEntry type="library" name="Maven: io.opencensus:opencensus-api:0.24.0" level="project" />
@@ -102,8 +103,8 @@
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.7.21" level="project" />
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-classic:1.2.1" level="project" />
     <orderEntry type="library" name="Maven: ch.qos.logback:logback-core:1.2.1" level="project" />
-    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.30" level="project" />
-    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib:1.4.30" level="project" />
+    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.4.31" level="project" />
+    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib:1.4.31" level="project" />
     <orderEntry type="library" name="Maven: org.jetbrains:annotations:13.0" level="project" />
     <orderEntry type="library" name="Maven: commons-io:commons-io:2.6" level="project" />
     <orderEntry type="library" name="Maven: io.sentry:sentry:4.0.0" level="project" />

@@ -155,6 +155,24 @@ fun Application.module() {
 
         }
 
+        get("/people") {
+            val session = call.sessions.get<MyRioterUid>()
+            val rioter = session?.let { it1 -> loadRioterInfo(it1.uid) }
+            if (rioter == null) {
+                call.respondRedirect("/logout", permanent = false)
+                return@get
+            }
+
+            val model = mutableMapOf<String, Any>()
+            val localPeople = loadPeople(rioter)
+            if (localPeople != null) {
+                model["people"] = localPeople.people.sortedBy { it.emailAddress }
+            } else {
+                model["refresh"] = "yes"
+            }
+            call.respond(VelocityContent("templates/people.vl", model))
+        }
+
         // URL that always crashes to manually test error handling.
         get("/testerror") {
             throw RuntimeException("Manually created error")
