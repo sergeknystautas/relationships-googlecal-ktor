@@ -35,7 +35,7 @@ data class CachedEventDateTime(val date: CachedDateTime? = null, val dateTime: C
                 gEventDateTime.timeZone
             )
 
-    private fun value(): Long {
+    fun value(): Long {
         if (date != null) {
             return date.value
         }

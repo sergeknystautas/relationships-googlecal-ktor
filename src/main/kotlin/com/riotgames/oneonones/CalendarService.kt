@@ -83,7 +83,7 @@ suspend fun retrieveEvents(rioter: MyRioterInfo, now: DateTime, jodaTZ: DateTime
     val nextMonths = now.plusWeeks(12)
     // "2021-03-20T10:00:00-08:00"
     val timeMax = com.google.api.client.util.DateTime(RFC3339.print(nextMonths))
-    println (RFC3339.print(nextMonths))
+    // println (RFC3339.print(nextMonths))
 
     val items: MutableList<Event> = ArrayList()
     var page: String? = null

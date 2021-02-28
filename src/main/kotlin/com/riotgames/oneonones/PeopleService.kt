@@ -64,8 +64,6 @@ fun loadPeople(rioter: MyRioterInfo): CachedPeople? {
     return peopleCache
 }
 
-
-
 /**
  * Calls the Google People API directory to retrieve profile data and create cached objects based on that.
  */

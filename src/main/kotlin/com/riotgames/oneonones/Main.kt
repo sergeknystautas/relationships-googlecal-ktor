@@ -142,6 +142,7 @@ fun Application.module() {
             val jodaTZ = DateTimeZone.forID(tz)
             val now = DateTime(jodaTZ)
             val today = now.toLocalDate().toDateTimeAtStartOfDay(jodaTZ)
+            model["today"] = today
 
             if (calendar != null && directory != null) {
                 model["report"] = RecentOneOnOneBuilder().build(calendar.events, today, jodaTZ, directory.people)
@@ -184,14 +185,17 @@ fun Application.module() {
 
             model["rioter"] = rioter
             model["email"] = email
+            model["updatedFormatter"] = DateTimeFormat.forPattern("MMM d, yyyy h:mm a")
             model["formatter"] = DateTimeFormat.forPattern("EE, MMM d, yyyy")
             model["ago"] = DaysSince(today)
+            model["tz"] = jodaTZ.getName(now.millis)
+
             if (calendar != null && directory != null) {
                 val person = directory.people.filter{it.emailAddress == email}
                 model["person"] = person[0]
                 model["username"] = email.removeSuffix("@riotgames.com")
                 model["report"] = PersonOneOnOneBuilder().build(calendar.events, email, jodaTZ, directory.people)
-
+                model["updated"] = DateTime(calendar.updated, jodaTZ)
             } else {
                 model["refresh"] = "yes"
             }

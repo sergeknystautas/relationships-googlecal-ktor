@@ -1,19 +1,28 @@
-      <div class="row">
-        <div class="col-10">
-          <h1 class="jumbotron-heading">One on one tracker</h1>
-          <p class="lead text-muted">This leverages your Google calendar to maintain relationships.  It will show the next time you will meet with people, either today or in the near future.  You might want to schedule a 1on1 with people who you last met <i>days ago</i> as you have nothing planned.</p>
-          #if ($updated)
-          <p class="text-muted">Calendar last updated at ${updated.toString($updatedFormatter)}, ${tz}</p>
-          <p class="text-muted">${report.meetings.size()} people</p>
-          #end
+  <div class="row">
+    <div class="col-10">
+      <h1 class="jumbotron-heading">One on one tracker</h1>
+      <p class="text-muted">Checks your Google calendar for one-on-ones with people who also work at Riot Games.</p>
+      ## <p class="lead text-muted">This leverages your Google calendar to maintain relationships.  It will show the next time you will meet with people, either today or in the near future.  You might want to schedule a 1on1 with people who you last met <i>days ago</i> as you have nothing planned.</p>
+      #if ($updated)
+      <p class="text-muted">Calendar last updated at ${updated.toString($updatedFormatter)}, ${tz}</p>
+      #end
+      #if ($report && !($person))
+      <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+          <a class="nav-item nav-link active" id="nav-overview-tab" data-toggle="tab" href="#nav-overview" role="tab" aria-controls="nav-overview" aria-selected="true">Overview</a>
+          <a class="nav-item nav-link" id="nav-building-tab" data-toggle="tab" href="#nav-building" role="tab" aria-controls="nav-building" aria-selected="false">Building</a>
+          <a class="nav-item nav-link" id="nav-aging-tab" data-toggle="tab" href="#nav-aging" role="tab" aria-controls="nav-aging" aria-selected="false">Aging</a>
         </div>
-        <div class="col-2">
-          <p class="text-muted">
-          <img src="${rioter.profilePic}" />
-          <br />
-          ${rioter.given_name}
-          <br />
-          <a href="/logout">Logout</a>
-          </p>
-        </div>
-      </div>
+      </nav>
+      #end
+    </div>
+    <div class="col-2">
+      <p class="text-muted">
+      <img src="${rioter.profilePic}" />
+      <br />
+      ${rioter.given_name}
+      <br />
+      <a href="/logout">Logout</a>
+      </p>
+    </div>
+  </div>
