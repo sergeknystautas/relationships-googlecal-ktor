@@ -32,6 +32,25 @@ This uses maven to clean previous artifacts and rebuild, then calls the heroku C
 
 ``http://localhost:5000``
 
+### Debug it locally
+
+Make sure you can run it locally first
+
+Create a remote debug configuration in InteliJ
+
+Example Steps [here]([https://www.baeldung.com/intellij-remote-debugging])
+
+For the command line arguments for the remote JVM use this:
+
+``-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005``
+
+Build and Launch Heroku:
+``mvn clean install && heroku local:start -f Procfile.dbg``
+
+If heroku is configured correctly you should see this in the console output: ``Listening for transport dt_socket at address: 5005``
+
+Once Heroku has started select Run -> Debug 'Name you chose for debug configuration'
+
 ## Deployment
 
 ### Environments
