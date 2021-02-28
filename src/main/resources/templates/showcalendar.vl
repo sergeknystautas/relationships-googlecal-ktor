@@ -1,72 +1,83 @@
 #parse("templates/header.vl")
 
+#macro(relationships $filter)
+  <div class="row">
+    <div class="col-3">
+      <strong>Rioter</strong>
+    </div>
+    <div class="col-3">
+      <strong>Last/next meeting</strong>
+    </div>
+    <div class="col-3">
+      <strong>Summary</strong>
+    </div>
+    <div class="col-3">
+      <strong>Relationship upkeep</strong>
+    </div>
+  </div>
+  #foreach ($meeting in $report.meetings)
+  #if ($filter == "building" && $meeting.datetime.millis >= $today.millis ||
+      $filter == "aging" && $meeting.datetime.millis < $today.millis)
+
+  <div class="row">
+    <div class="col-3">
+      <a href="/r/$esc.url($meeting.email)">${meeting.name}</a>
+    </div>
+    <div class="col-3">
+      ${meeting.datetime.toString($formatter)}
+    </div>
+    <div class="col-3">
+      ${meeting.summary}
+    </div>
+    <div class="col-3">
+      #if ($meeting.datetime.isEqual($ago.now))
+        Today
+      #elseif ($meeting.datetime.isBefore($ago.now))
+        ${ago.since($meeting.datetime)} ago
+      #else
+        in ${ago.until($meeting.datetime)}
+      #end
+    </div>
+  </div>
+  #end
+  #end
+#end
+
 <main role="main">
 
   <section class="jumbotron">
     <div class="container">
 
-      <div class="row">
-        <div class="col-10">
-          <h1 class="jumbotron-heading">One on one tracker</h1>
-          <p class="lead text-muted">This leverages your Google calendar to maintain relationships.  It will show the next time you will meet with people, either today or in the near future.  You might want to schedule a 1on1 with people who you last met <i>days ago</i> as you have nothing planned.</p>
-          #if ($updated)
-          <p class="text-muted">Calendar last updated at ${updated.toString($updatedFormatter)}, ${tz}</p>
-          #end
-        </div>
-        <div class="col-2">
-          <p class="text-muted">
-          <img src="${rioter.profilePic}" />
-          <br />
-          ${rioter.given_name}
-          <br />
-          <a href="/logout">Logout</a>
-          </p>
-        </div>
-      </div>
+      #parse("templates/banner.vl")
+
       #if ($report)
-      <div class="row">
-        <div class="col-3">
-          <strong>Rioter</strong>
+      <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="nav-overview" role="tabpanel" aria-labelledby="nav-overview-tab">
+        #parse("templates/overview.vl")
         </div>
-        <div class="col-3">
-          <strong>Last/next meeting</strong>
+        <div class="tab-pane fade" id="nav-building" role="tabpanel" aria-labelledby="nav-building-tab">
+          <div class="row">
+            <div class="col-12">
+              <h3>Rioters you are scheduled to meet</h3>
+            </div>
+          </div>
+          #relationships("building")
         </div>
-        <div class="col-3">
-          <strong>Summary</strong>
-        </div>
-        <div class="col-3">
-          <strong>Relationship upkeep</strong>
-        </div>
-      </div>
-      #foreach ($meeting in $report.meetings)
-
-      <div class="row">
-        <div class="col-3">
-          ${meeting.name}
-        </div>
-        <div class="col-3">
-          ${meeting.datetime.toString($formatter)}
-        </div>
-        <div class="col-3">
-          ${meeting.summary}
-        </div>
-        <div class="col-3">
-          #if ($meeting.datetime.isEqual($ago.now))
-            Today
-          #elseif ($meeting.datetime.isBefore($ago.now))
-            ${ago.since($meeting.datetime)} ago
-          #else
-            in ${ago.until($meeting.datetime)}
-          #end
-
+        <div class="tab-pane fade" id="nav-aging" role="tabpanel" aria-labelledby="nav-aging-tab">
+          <div class="row">
+            <div class="col-12">
+              <h3>Rioters you are <strong>not</strong> scheduled to meet</h3>
+            </div>
+          </div>
+          #relationships("aging")
         </div>
       </div>
-      #end
+
       #else
       <div class="row">
         <div class="col-12">
         <p>
-        Your calendar is still being loaded from Google...
+        Your calendar and the company directory are still being loaded from Google...
         </p>
         <p>
         <div class="progress">

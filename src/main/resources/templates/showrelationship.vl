@@ -1,0 +1,106 @@
+#parse("templates/header.vl")
+
+<main role="main">
+
+  <section class="jumbotron">
+    <div class="container">
+
+      #parse("templates/banner.vl")
+
+      #if ($person)
+      <div class="row">
+        <div class="col-3">
+        #if ($person.photoUrl)
+        <img src="$person.photoUrl">
+        #end
+        </div>
+        <div class="col-3">
+        <strong>Information</strong>
+        <br />
+        Name:
+        #if ($person.displayName)
+          $person.displayName
+        #else
+          <i>Unknown</i>
+        #end
+        <br />
+        Email: $person.emailAddress
+        <br />
+        Manager email:
+        #if ($person.managerEmail)
+          $person.managerEmail
+        #else
+          <i>Unknown</i>
+        #end
+        </div>
+        <div class="col-3">
+        <strong>Quick links</strong>
+        <br />
+        <a href="https://org.riotnet.io/people/$username">Profile</a>
+        <br />
+        <a href="https://riotgames.slack.com/team/$username">Slack</a>
+        <br />
+        Tenurous
+        </div>
+        <div class="col-3">
+        what else???
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+        ## my design skills suck
+        <a href="/">See everyone</a>
+        <br />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong>Meeting time</strong>
+        </div>
+        <div class="col-3">
+          <strong>Summary</strong>
+        </div>
+        <div class="col-6">
+          ## <strong>say something</strong>
+        </div>
+      </div>
+
+      #foreach ($meeting in $report.meetings)
+      <div class="row">
+        <div class="col-3">
+          ${meeting.datetime.toString($formatter)}
+        </div>
+        <div class="col-3">
+          ${meeting.summary}
+        </div>
+        <div class="col-6">
+          #if ($meeting.datetime.isEqual($ago.now))
+            Today
+          #elseif ($meeting.datetime.isBefore($ago.now))
+            ${ago.since($meeting.datetime)} ago
+          #else
+            in ${ago.until($meeting.datetime)}
+          #end
+        </div>
+      </div>
+      #end
+
+      #else
+      <div class="row">
+        <div class="col-12">
+        <p>
+        Your calendar and the company directory are still being loaded from Google...
+        </p>
+        <p>
+        <div class="progress">
+          <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+        </div>
+        </p>
+        </div>
+      </div>
+      #end
+    </div>
+  </section>
+</main>
+
+#parse("templates/footer.vl")

@@ -25,10 +25,11 @@ import org.joda.time.format.DateTimeFormat
 import io.sentry.Sentry
 import io.sentry.SentryOptions
 import io.sentry.protocol.User
+import org.apache.velocity.tools.generic.EscapeTool
 import org.joda.time.DateTimeZone
 
 val ENVIRONMENT = System.getenv("ENVIRONMENT") ?: "development"
-
+val ESCAPE_TOOL = EscapeTool()
 /**
  * Configures the webserver and does routing.
  */
@@ -132,16 +133,19 @@ fun Application.module() {
 
             // Generate our main report
             model["rioter"] = rioter
+            model["esc"] = ESCAPE_TOOL
 
             val calendar = loadCalendar(rioter)
+            val directory = loadDirectory(rioter)
 
             val tz = retrieveCalendarTZ(rioter)
             val jodaTZ = DateTimeZone.forID(tz)
             val now = DateTime(jodaTZ)
             val today = now.toLocalDate().toDateTimeAtStartOfDay(jodaTZ)
+            model["today"] = today
 
-            if (calendar != null) {
-                model["report"] = RecentOneOnOneBuilder().build(calendar.events, today, jodaTZ)
+            if (calendar != null && directory != null) {
+                model["report"] = RecentOneOnOneBuilder().build(calendar.events, today, jodaTZ, directory.people)
                 model["updated"] = DateTime(calendar.updated, jodaTZ)
             } else {
                 model["refresh"] = "yes"
@@ -152,7 +156,70 @@ fun Application.module() {
             model["tz"] = jodaTZ.getName(now.millis)
 
             call.respond(VelocityContent("templates/showcalendar.vl", model))
+        }
 
+        get("/r/{email}") {
+            val model = mutableMapOf<String, Any>()
+            val session = call.sessions.get<MyRioterUid>()
+            // If you're not signed in, we'll render with a welcome page.
+            if (session == null) {
+                call.respond(VelocityContent("templates/welcome.vl", model))
+                return@get
+            }
+
+            // If you sent a cookie like you're logged in, but we can't find you in our session service
+            // Redirect you to the logout page.
+            val rioter = loadRioterInfo(session.uid)
+            if (rioter == null) {
+                call.respondRedirect("/logout", permanent = false)
+                return@get
+            }
+            val email = call.parameters["email"].toString()
+            val tz = retrieveCalendarTZ(rioter)
+            val jodaTZ = DateTimeZone.forID(tz)
+            val now = DateTime(jodaTZ)
+            val today = now.toLocalDate().toDateTimeAtStartOfDay(jodaTZ)
+
+            val calendar = loadCalendar(rioter)
+            val directory = loadDirectory(rioter)
+
+            model["rioter"] = rioter
+            model["email"] = email
+            model["updatedFormatter"] = DateTimeFormat.forPattern("MMM d, yyyy h:mm a")
+            model["formatter"] = DateTimeFormat.forPattern("EE, MMM d, yyyy")
+            model["ago"] = DaysSince(today)
+            model["tz"] = jodaTZ.getName(now.millis)
+
+            if (calendar != null && directory != null) {
+                val person = directory.people.filter{it.emailAddress == email}
+                model["person"] = person[0]
+                model["username"] = email.removeSuffix("@riotgames.com")
+                model["report"] = PersonOneOnOneBuilder().build(calendar.events, email, jodaTZ, directory.people)
+                model["updated"] = DateTime(calendar.updated, jodaTZ)
+            } else {
+                model["refresh"] = "yes"
+            }
+
+            call.respond(VelocityContent("templates/showrelationship.vl", model))
+
+        }
+
+        get("/people") {
+            val session = call.sessions.get<MyRioterUid>()
+            val rioter = session?.let { it1 -> loadRioterInfo(it1.uid) }
+            if (rioter == null) {
+                call.respondRedirect("/logout", permanent = false)
+                return@get
+            }
+
+            val model = mutableMapOf<String, Any>()
+            val localPeople = loadPeople(rioter)
+            if (localPeople != null) {
+                model["people"] = localPeople.people.sortedBy { it.emailAddress }
+            } else {
+                model["refresh"] = "yes"
+            }
+            call.respond(VelocityContent("templates/people.vl", model))
         }
 
         // URL that always crashes to manually test error handling.

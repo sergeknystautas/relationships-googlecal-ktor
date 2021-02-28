@@ -13,13 +13,13 @@ import kotlin.collections.ArrayList
  * Information we need from a calendar
  */
 @Serializable
-data class CachedCalendar(val updated: Long, val events: List<CachedEvent>, val timeZone: String)
+data class CachedCalendar(val updated: Long, val syncToken: String, val events: List<CachedEvent>, val timeZone: String)
 
 /**
  * Information we need from an event.
  */
 @Serializable
-data class CachedEvent(val attendees: List<CachedAttendee>, val attendeeCount: Int, val nonResourceCount: Int,
+data class CachedEvent(val id: String, val attendees: List<CachedAttendee>, val attendeeCount: Int, val nonResourceCount: Int,
                        val summary: String, val start: CachedEventDateTime)
 
 /**
@@ -35,7 +35,7 @@ data class CachedEventDateTime(val date: CachedDateTime? = null, val dateTime: C
                 gEventDateTime.timeZone
             )
 
-    private fun value(): Long {
+    fun value(): Long {
         if (date != null) {
             return date.value
         }
@@ -79,9 +79,20 @@ data class CachedAttendee(val name: String?, val email: String, val responseStat
                           val self: Boolean, val resource: Boolean)
 
 class CachedCalendarBuilder {
-    fun createCalendar(updated: Long, gEvents: List<Event>, jodaTZ: DateTimeZone): CachedCalendar {
+    fun createCalendar(oldCalendar: CachedCalendar?, updated: Long, syncToken: String,
+                       gEvents: List<Event>, jodaTZ: DateTimeZone): CachedCalendar {
         val events = ArrayList<CachedEvent>()
+        if (oldCalendar != null) {
+            events.addAll(oldCalendar.events)
+        }
+        // Create a map of event ids to the event.
+        val oldEvents = events.map { event ->
+            event.id to event
+        }.toMap()
         for (gEvent in gEvents) {
+            // Use this id to see if there's an old event.  If there is, remove it
+            events.remove(oldEvents[gEvent.id])
+            // Add the event if it is worthy
             if (gEvent.status != "cancelled" && gEvent.start != null) {
                 val event = createEvent(gEvent)
                 if (event != null) {
@@ -89,7 +100,7 @@ class CachedCalendarBuilder {
                 }
             }
         }
-        return CachedCalendar(updated, events, jodaTZ.id)
+        return CachedCalendar(updated, syncToken, events, jodaTZ.id)
     }
 
     fun createEvent(gEvent: Event): CachedEvent? {
@@ -130,7 +141,7 @@ class CachedCalendarBuilder {
             // println(gEvent)
         }
         // End debugging.
-        return CachedEvent(attendees, attendeeCount, nonResourceCount,
+        return CachedEvent(gEvent.id, attendees, attendeeCount, nonResourceCount,
             gEvent.summary?: "", CachedEventDateTime(gEvent.start))
     }
 
