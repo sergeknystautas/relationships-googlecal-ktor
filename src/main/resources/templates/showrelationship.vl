@@ -7,34 +7,73 @@
 
       #parse("templates/banner.vl")
 
-      #if ($report)
+      #if ($person)
       <div class="row">
         <div class="col-3">
-          <strong>Rioter</strong>
+        #if ($person.photoUrl)
+        <img src="$person.photoUrl">
+        #end
         </div>
         <div class="col-3">
-          <strong>Last/next meeting</strong>
+        <strong>Information</strong>
+        <br />
+        Name:
+        #if ($person.displayName)
+          $person.displayName
+        #else
+          <i>Unknown</i>
+        #end
+        <br />
+        Email: $person.emailAddress
+        <br />
+        Manager email:
+        #if ($person.managerEmail)
+          $person.managerEmail
+        #else
+          <i>Unknown</i>
+        #end
+        </div>
+        <div class="col-3">
+        <strong>Quick links</strong>
+        <br />
+        <a href="https://org.riotnet.io/people/$username">Profile</a>
+        <br />
+        <a href="https://riotgames.slack.com/team/$username">Slack</a>
+        <br />
+        Tenurous
+        </div>
+        <div class="col-3">
+        what else???
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12">
+        ## my design skills suck
+        <a href="/">See everyone</a>
+        <br />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-3">
+          <strong>Meeting time</strong>
         </div>
         <div class="col-3">
           <strong>Summary</strong>
         </div>
-        <div class="col-3">
-          <strong>Relationship upkeep</strong>
+        <div class="col-6">
+          ## <strong>say something</strong>
         </div>
       </div>
-      #foreach ($meeting in $report.meetings)
 
+      #foreach ($meeting in $report.meetings)
       <div class="row">
-        <div class="col-3">
-          <a href="/r/$esc.url($meeting.email)">${meeting.name}</a>
-        </div>
         <div class="col-3">
           ${meeting.datetime.toString($formatter)}
         </div>
         <div class="col-3">
           ${meeting.summary}
         </div>
-        <div class="col-3">
+        <div class="col-6">
           #if ($meeting.datetime.isEqual($ago.now))
             Today
           #elseif ($meeting.datetime.isBefore($ago.now))
@@ -45,6 +84,7 @@
         </div>
       </div>
       #end
+
       #else
       <div class="row">
         <div class="col-12">
@@ -59,11 +99,8 @@
         </div>
       </div>
       #end
-
-
     </div>
   </section>
-
 </main>
 
 #parse("templates/footer.vl")

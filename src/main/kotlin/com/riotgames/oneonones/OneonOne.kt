@@ -3,14 +3,34 @@ package com.riotgames.oneonones
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import org.joda.time.ReadableInstant
-import java.util.*
-import kotlin.collections.ArrayList
 
-data class RecentOneOnOneMeeting (val email: String, val name: String,
-                                  val summary: String, val datetime: ReadableInstant)  : Comparable<RecentOneOnOneMeeting> {
-    override fun compareTo(other: RecentOneOnOneMeeting) = compareValues(-this.datetime.millis, -other.datetime.millis)
+data class OneOnOneMeeting (val email: String, val name: String,
+                                  val summary: String, val datetime: ReadableInstant)  : Comparable<OneOnOneMeeting> {
+    override fun compareTo(other: OneOnOneMeeting) = compareValues(-this.datetime.millis, -other.datetime.millis)
 }
-data class RecentOneOnOneReport (val meetings: List<RecentOneOnOneMeeting>)
+data class OneOnOneReport (val meetings: List<OneOnOneMeeting>)
+
+class PersonOneOnOneBuilder: AbstractOneOnOneBuilder() {
+    /**
+     * Build the report based on the list of cached events and as of a point in time handed, assumed to be
+     * now or today in normal operation.
+     */
+    fun build(events: List<CachedEvent>, email: String, jodaTZ: DateTimeZone, people: List<CachedPerson>): OneOnOneReport {
+        val meetings = ArrayList<OneOnOneMeeting>()
+        events.filter { isOneOnOne(it)}.forEach {
+            val meeting = createMeeting(it, jodaTZ)
+            if (meeting != null && meeting.email == email) {
+                meetings.add(meeting)
+            }
+        }
+
+        // Let's sort the meetings now, well, seems like we don't really need to.
+        meetings.sort()
+
+        return OneOnOneReport(meetings)
+    }
+
+}
 
 /**
  * This class builds the report of recent one-on-ones.  It looks for meetings that meet the one-on-one definition
@@ -18,14 +38,14 @@ data class RecentOneOnOneReport (val meetings: List<RecentOneOnOneMeeting>)
  * person to show today or the next upcoming event as the first priority, and then the most recent past event
  * if there are none upcoming.
  */
-class RecentOneOnOneBuilder {
+class RecentOneOnOneBuilder: AbstractOneOnOneBuilder() {
     /**
      * Build the report based on the list of cached events and as of a point in time handed, assumed to be
      * now or today in normal operation.
      */
-    fun build(events: List<CachedEvent>, today: ReadableInstant, jodaTZ: DateTimeZone, people: List<CachedPerson>): RecentOneOnOneReport {
+    fun build(events: List<CachedEvent>, today: ReadableInstant, jodaTZ: DateTimeZone, people: List<CachedPerson>): OneOnOneReport {
 
-        val latestOneOnOnes: MutableMap<String, RecentOneOnOneMeeting> = HashMap<String, RecentOneOnOneMeeting>()
+        val latestOneOnOnes: MutableMap<String, OneOnOneMeeting> = HashMap<String, OneOnOneMeeting>()
 
         // I need to sort the events by ascending start time
         for (event in events.sortedBy { it.start }) {
@@ -33,7 +53,7 @@ class RecentOneOnOneBuilder {
                 // Skip events that are not one on ones
                 continue
             }
-            val meeting: RecentOneOnOneMeeting = createMeeting(event, jodaTZ) ?: continue
+            val meeting: OneOnOneMeeting = createMeeting(event, jodaTZ) ?: continue
             updateMeeting(latestOneOnOnes, meeting, today)
         }
 
@@ -44,7 +64,7 @@ class RecentOneOnOneBuilder {
         // Let's sort the meetings now, well, seems like we don't really need to.
         meetings.sort()
 
-        return RecentOneOnOneReport(meetings)
+        return OneOnOneReport(meetings)
     }
 
     /**
@@ -53,9 +73,9 @@ class RecentOneOnOneBuilder {
      * for this person, then this newer meeting is the one to do.  We pass in the point in time assumed
      * to be today in normal operations.
      */
-    private fun updateMeeting(latestOneOnOnes: MutableMap<String, RecentOneOnOneMeeting>,
-                              meeting: RecentOneOnOneMeeting, today: ReadableInstant) {
-        val lastMeeting: RecentOneOnOneMeeting? = latestOneOnOnes[meeting.email]
+    private fun updateMeeting(latestOneOnOnes: MutableMap<String, OneOnOneMeeting>,
+                              meeting: OneOnOneMeeting, today: ReadableInstant) {
+        val lastMeeting: OneOnOneMeeting? = latestOneOnOnes[meeting.email]
         // aside from null, there's a 3x3 grid of lastmeeting and meeting being before, today or after
         if (lastMeeting == null) {
             latestOneOnOnes[meeting.email] = meeting
@@ -83,11 +103,15 @@ class RecentOneOnOneBuilder {
         }
     }
 
+}
+
+open class AbstractOneOnOneBuilder {
+
     /**
      * The caching layer collapses information and allows us to make assumptions so that we simply need
      * to check for 2 attendees, no resources, and nobody declined to determine it's a one-on-one.
      */
-    private fun isOneOnOne(event: CachedEvent): Boolean {
+    protected fun isOneOnOne(event: CachedEvent): Boolean {
         if (event.attendeeCount != 2 || event.nonResourceCount !=2 ) {
             return false
         }
@@ -100,7 +124,7 @@ class RecentOneOnOneBuilder {
     /**
      * Get the other attendee in the event.
      */
-    private fun notMe(attendees: List<CachedAttendee>): CachedAttendee? {
+    protected fun notMe(attendees: List<CachedAttendee>): CachedAttendee? {
         for (attendee in attendees) {
             // Skip over rooms
             if (attendee.resource) {
@@ -131,7 +155,7 @@ class RecentOneOnOneBuilder {
      * Creates a meeting entry for this report based on the cached event.  This will help with the grouping logic
      * and then used for presentation layer.
      */
-    private fun createMeeting(event: CachedEvent, jodaTZ: DateTimeZone): RecentOneOnOneMeeting? {
+    protected fun createMeeting(event: CachedEvent, jodaTZ: DateTimeZone): OneOnOneMeeting? {
         // println("Creating meeting for ${event}")
         // Other
         val other = notMe(event.attendees) ?: return null
@@ -139,7 +163,7 @@ class RecentOneOnOneBuilder {
         // Return the meeting we are creating
         val start = fromDateTime(event.start, jodaTZ) ?: return null
         val displayName = other.name ?: other.email
-        return RecentOneOnOneMeeting(other.email, displayName, event.summary, start)
+        return OneOnOneMeeting(other.email, displayName, event.summary, start)
     }
 
     /**

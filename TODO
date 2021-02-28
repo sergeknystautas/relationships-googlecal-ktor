@@ -8,8 +8,8 @@ IMPROVEMENTS (make what is there, better)
 - Highlight what is a recurring meeting (or if you do with this individual)
 - Cache the calendar data somewhere (redis or mysql?).
 x Store when the calendar was last updated, store the sync token, and use that for faster queries to update what is cached.
-- Show a report per person to see all of the 1on1s you've had with someone
-- Link to a person's profile from their report
+x Show a report per person to see all of the 1on1s you've had with someone
+x Link to a person's profile from their report
 
 ENHANCEMENTS (take this in new directions)
 - In discussing the way I use the report, it'd be good to split this report into different sections and give guidance on the why.
