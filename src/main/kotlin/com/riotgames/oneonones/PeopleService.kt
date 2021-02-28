@@ -38,7 +38,7 @@ fun loadDirectory(rioter: MyRioterInfo): CachedPeople? {
                 directoryCache = retrieveDirectory(rioter)
             }
         } else if (directoryCacheLoader?.isCompleted == true) {
-            directoryCacheLoader == null
+            directoryCacheLoader = null
         }
     }
     return directoryCache
