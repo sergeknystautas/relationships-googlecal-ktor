@@ -12,7 +12,7 @@ x Show a report per person to see all of the 1on1s you've had with someone
 x Link to a person's profile from their report
 
 ENHANCEMENTS (take this in new directions)
-- In discussing the way I use the report, it'd be good to split this report into different sections and give guidance on the why.
+x In discussing the way I use the report, it'd be good to split this report into different sections and give guidance on the why.
 - Use the people API/user directory to find your reports.  Show that on the existing report and add a new report to show my reports and manager and if I have recurring events.
 - Export reports to Google sheets https://developers.google.com/sheets/api/guides/create#java
 
