@@ -1,24 +1,6 @@
 #parse("templates/header.vl")
 
-#macro(relationships $filter)
-  <div class="row">
-    <div class="col-3">
-      <strong>Rioter</strong>
-    </div>
-    <div class="col-3">
-      <strong>Last/next meeting</strong>
-    </div>
-    <div class="col-3">
-      <strong>Summary</strong>
-    </div>
-    <div class="col-3">
-      <strong>Relationship upkeep</strong>
-    </div>
-  </div>
-  #foreach ($meeting in $report.meetings)
-  #if ($filter == "building" && $meeting.datetime.millis >= $today.millis ||
-      $filter == "aging" && $meeting.datetime.millis < $today.millis)
-
+#macro(relationshipRow $meeting)
   <div class="row">
     <div class="col-3">
       <a href="/r/$esc.url($meeting.email)">${meeting.name}</a>
@@ -39,7 +21,37 @@
       #end
     </div>
   </div>
-  #end
+#end
+
+#macro(relationships $filter)
+  <div class="row">
+    <div class="col-3">
+      <strong>Rioter</strong>
+    </div>
+    <div class="col-3">
+      <strong>Last/next meeting</strong>
+    </div>
+    <div class="col-3">
+      <strong>Summary</strong>
+    </div>
+    <div class="col-3">
+      <strong>Relationship upkeep</strong>
+    </div>
+  </div>
+  #if ($filter == "building")
+    #foreach ($meeting in $report.reverse)
+      #if ($meeting.datetime.millis >= $today.millis)
+        #relationshipRow($meeting)
+      #end
+    #end
+  #elseif ($filter == "aging")
+    #foreach ($meeting in $report.meetings)
+      #if ($meeting.datetime.millis < $today.millis)
+        #relationshipRow($meeting)
+      #end
+    #end
+  #else
+    <div class="row"><div class="col-12">Unknown filter $filter</div></div>
   #end
 #end
 
