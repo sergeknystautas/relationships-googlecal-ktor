@@ -8,7 +8,13 @@ data class OneOnOneMeeting (val email: String, val name: String,
                                   val summary: String, val datetime: ReadableInstant)  : Comparable<OneOnOneMeeting> {
     override fun compareTo(other: OneOnOneMeeting) = compareValues(-this.datetime.millis, -other.datetime.millis)
 }
-data class OneOnOneReport (val meetings: List<OneOnOneMeeting>)
+data class OneOnOneReport (val meetings: List<OneOnOneMeeting>) {
+    // This is a necessary convenience function because our velocity template system expects a getter naming
+    // pattern, and it cannot call any function/method you might want.
+    fun getReverse(): List<OneOnOneMeeting> {
+        return meetings.asReversed()
+    }
+}
 
 class PersonOneOnOneBuilder: AbstractOneOnOneBuilder() {
     /**
