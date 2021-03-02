@@ -119,11 +119,11 @@ suspend fun retrieveEvents(rioter: MyRioterInfo, now: DateTime, jodaTZ: DateTime
 
     val calendarCache = calendarBuilder.createCalendar(oldCalendar, updated!!, syncToken!!, items, jodaTZ)
 
-    val json = Json.encodeToString(calendarCache)
-    println("Json is ${json.length} long for ${calendarCache.events.size} events")
+    // val json = Json.encodeToString(calendarCache)
+    // println("Json is ${json.length} long for ${calendarCache.events.size} events")
 
-    val compressedJson = gzip(json)
-    println("Compressed is ${compressedJson.size} long")
+    // val compressedJson = gzip(json)
+    // println("Compressed is ${compressedJson.size} long")
 
     // val bytes = MsgPack.default.encodeToByteArray(calendarCache)
     // println("MsgPack is ${bytes.length} long")
