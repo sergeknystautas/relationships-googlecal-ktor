@@ -29,7 +29,7 @@
       <strong>Rioter</strong>
     </div>
     <div class="col-3">
-      <strong>Last/next meeting</strong>
+      <strong>#if ($filter == "building") Next meeting #elseif ($filter == "aging") Last meeting #else Meeting #end</strong>
     </div>
     <div class="col-3">
       <strong>Summary</strong>
