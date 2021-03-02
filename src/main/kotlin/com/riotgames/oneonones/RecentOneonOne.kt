@@ -23,7 +23,7 @@ class RecentOneOnOneBuilder {
      * Build the report based on the list of cached events and as of a point in time handed, assumed to be
      * now or today in normal operation.
      */
-    fun build(events: List<CachedEvent>, today: ReadableInstant, jodaTZ: DateTimeZone): RecentOneOnOneReport {
+    fun build(events: List<CachedEvent>, today: ReadableInstant, jodaTZ: DateTimeZone, nameCache: MutableMap<String, MutableList<String>>): RecentOneOnOneReport {
 
         val latestOneOnOnes: MutableMap<String, RecentOneOnOneMeeting> = HashMap<String, RecentOneOnOneMeeting>()
 
@@ -33,7 +33,7 @@ class RecentOneOnOneBuilder {
                 // Skip events that are not one on ones
                 continue
             }
-            val meeting: RecentOneOnOneMeeting = createMeeting(event, jodaTZ) ?: continue
+            val meeting: RecentOneOnOneMeeting = createMeeting(event, jodaTZ, nameCache) ?: continue
             updateMeeting(latestOneOnOnes, meeting, today)
         }
 
@@ -128,14 +128,17 @@ class RecentOneOnOneBuilder {
      * Creates a meeting entry for this report based on the cached event.  This will help with the grouping logic
      * and then used for presentation layer.
      */
-    private fun createMeeting(event: CachedEvent, jodaTZ: DateTimeZone): RecentOneOnOneMeeting? {
+    private fun createMeeting(event: CachedEvent, jodaTZ: DateTimeZone, nameCache: MutableMap<String, MutableList<String>>): RecentOneOnOneMeeting? {
         // println("Creating meeting for ${event}")
         // Other
         val other = notMe(event.attendees) ?: return null
 
         // Return the meeting we are creating
         val start = fromDateTime(event.start, jodaTZ) ?: return null
-        val displayName = other.name ?: other.email
+        var displayName = other.name ?: other.email
+        if (other.name == null && nameCache[other.email] != null && nameCache[other.email]?.get(0) != null) {
+            displayName = nameCache[other.email]?.get(0) as String
+        }
         return RecentOneOnOneMeeting(other.email, displayName, event.summary, start)
     }
 

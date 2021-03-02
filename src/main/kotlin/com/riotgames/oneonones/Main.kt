@@ -133,6 +133,7 @@ fun Application.module() {
             // Generate our main report
             model["rioter"] = rioter
 
+            val nameCache = getGoogleSheetData(rioter)
             val calendar = loadCalendar(rioter)
 
             val tz = retrieveCalendarTZ(rioter)
@@ -141,7 +142,7 @@ fun Application.module() {
             val today = now.toLocalDate().toDateTimeAtStartOfDay(jodaTZ)
 
             if (calendar != null) {
-                model["report"] = RecentOneOnOneBuilder().build(calendar.events, today, jodaTZ)
+                model["report"] = RecentOneOnOneBuilder().build(calendar.events, today, jodaTZ, nameCache)
                 model["updated"] = DateTime(calendar.updated, jodaTZ)
             } else {
                 model["refresh"] = "yes"

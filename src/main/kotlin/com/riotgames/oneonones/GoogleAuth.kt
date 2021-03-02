@@ -44,7 +44,8 @@ val googleOauthProvider = OAuthServerSettings.OAuth2ServerSettings(
     defaultScopes = listOf("profile", // no email, but gives full name, picture, and id
         "email", // email
         "https://www.googleapis.com/auth/calendar.readonly", // google calendar
-        "https://www.googleapis.com/auth/admin.directory.user.readonly" // user directory
+        "https://www.googleapis.com/auth/admin.directory.user.readonly", // user directory
+        "https://www.googleapis.com/auth/spreadsheets.readonly"
     , PeopleServiceScopes.CONTACTS_READONLY, PeopleServiceScopes.DIRECTORY_READONLY
     )
 )
