@@ -184,6 +184,6 @@ open class AbstractOneOnOneBuilder {
         if (dateMaybeTime == null) {
             dateMaybeTime = start.date
         }
-        return DateTime(dateMaybeTime!!.value).toLocalDate().toDateTimeAtStartOfDay(jodaTZ)
+        return DateTime(dateMaybeTime!!.value, jodaTZ).toLocalDate().toDateTimeAtStartOfDay(jodaTZ)
     }
 }
