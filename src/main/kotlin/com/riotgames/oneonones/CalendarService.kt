@@ -6,18 +6,17 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.joda.time.DateTime
 import org.joda.time.DateTimeZone
 import org.joda.time.format.ISODateTimeFormat
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets.UTF_8
-import java.util.ArrayList
+import java.util.*
 import java.util.zip.GZIPOutputStream
+import kotlin.collections.HashMap
 
 var calendarCacheLoader = HashMap<String, Job>()
-var calendarCache= HashMap<String, CachedCalendar>()
+var calendarCache= WeakHashMap<String, CachedCalendar>()
 
 /**
  * Gets a reference to people, if we haven't tried yet, start a job to download.
@@ -119,11 +118,11 @@ suspend fun retrieveEvents(rioter: MyRioterInfo, now: DateTime, jodaTZ: DateTime
 
     val calendarCache = calendarBuilder.createCalendar(oldCalendar, updated!!, syncToken!!, items, jodaTZ)
 
-    val json = Json.encodeToString(calendarCache)
-    println("Json is ${json.length} long for ${calendarCache.events.size} events")
+    // val json = Json.encodeToString(calendarCache)
+    // println("Json is ${json.length} long for ${calendarCache.events.size} events")
 
-    val compressedJson = gzip(json)
-    println("Compressed is ${compressedJson.size} long")
+    // val compressedJson = gzip(json)
+    // println("Compressed is ${compressedJson.size} long")
 
     // val bytes = MsgPack.default.encodeToByteArray(calendarCache)
     // println("MsgPack is ${bytes.length} long")

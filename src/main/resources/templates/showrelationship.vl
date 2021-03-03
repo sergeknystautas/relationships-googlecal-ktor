@@ -24,9 +24,9 @@
           <i>Unknown</i>
         #end
         <br />
-        Email: $person.emailAddress
+        Email: <a href="mailto:$person.emailAddress">$person.emailAddress</a>
         <br />
-        Manager email:
+        Manager:
         #if ($person.managerEmail)
           $person.managerEmail
         #else
