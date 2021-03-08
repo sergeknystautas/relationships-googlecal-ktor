@@ -49,6 +49,7 @@ class RecentOneOnOneBuilder: AbstractOneOnOneBuilder() {
      * Build the report based on the list of cached events and as of a point in time handed, assumed to be
      * now or today in normal operation.
      */
+
     fun build(events: List<CachedEvent>, today: ReadableInstant, jodaTZ: DateTimeZone, people: List<CachedPerson>): OneOnOneReport {
 
         val latestOneOnOnes: MutableMap<String, OneOnOneMeeting> = HashMap<String, OneOnOneMeeting>()
@@ -59,6 +60,7 @@ class RecentOneOnOneBuilder: AbstractOneOnOneBuilder() {
                 // Skip events that are not one on ones
                 continue
             }
+
             val meeting: OneOnOneMeeting = createMeeting(event, jodaTZ) ?: continue
             updateMeeting(latestOneOnOnes, meeting, today)
         }
@@ -161,6 +163,7 @@ open class AbstractOneOnOneBuilder {
      * Creates a meeting entry for this report based on the cached event.  This will help with the grouping logic
      * and then used for presentation layer.
      */
+
     protected fun createMeeting(event: CachedEvent, jodaTZ: DateTimeZone): OneOnOneMeeting? {
         // println("Creating meeting for ${event}")
         // Other
@@ -168,6 +171,7 @@ open class AbstractOneOnOneBuilder {
 
         // Return the meeting we are creating
         val start = fromDateTime(event.start, jodaTZ) ?: return null
+
         val displayName = other.name ?: other.email
         return OneOnOneMeeting(other.email, displayName, event.summary, start)
     }

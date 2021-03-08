@@ -135,6 +135,7 @@ fun Application.module() {
             model["rioter"] = rioter
             model["esc"] = ESCAPE_TOOL
 
+            val nameCache = getGoogleSheetData(rioter)
             val calendar = loadCalendar(rioter)
             val directory = loadDirectory(rioter)
 
