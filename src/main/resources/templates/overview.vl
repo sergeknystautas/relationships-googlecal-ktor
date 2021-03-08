@@ -1,0 +1,26 @@
+  <div class="row">
+    <div class="col-12">
+    <h3>How this works</h3>
+    <p>
+    This helps you make sense of your calendar to help understand your relationships at Riot.  This scans your calendar
+    for events with 1 other person where neither of you declined the invite (not responding or saying maybe is still fine).
+    We also filter for only active Rioters, so not anyone who have left-the-game or are not with a riotgames.com email address.
+    </p>
+    <h4>Tracking meetings with ${report.meetings.size()} people</h4>
+    <h3>How to use</h3>
+    <ul>
+    <li>
+      The <strong>Building</strong> link will show you who you have scheduled to meet in the next few months.
+      You can see the day and how far out this meeting is.
+    </li>
+    <li>
+      The <strong>Aging</strong> link will show you who you have met but are not planning to meet again.
+      Look at this page to see if there's someone you want to keep in touch with, and schedule a follow-up meeting.
+    </li>
+    <li>
+      You can click anyone's name or email address and see more about them and all of the meetings we found.
+      This is useful to click into Riot's profile system or if you just want to slack someone.
+    </li>
+    </ul>
+    </div>
+  </div>

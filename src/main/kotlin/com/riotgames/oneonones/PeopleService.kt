@@ -14,7 +14,12 @@ var peopleCacheLoader: Job? = null
 var peopleCache: CachedPeople? = null
 
 /*
- Relevant fields for People API
+ Relevant fields for People API...
+ All types:
+ addresses,ageRanges,biographies,birthdays,calendarUrls,clientData,coverPhotos,emailAddresses,events,externalIds,genders,imClients,interests,locales,locations,memberships,metadata,miscKeywords,names,nicknames,occupations,organizations,phoneNumbers,photos,relations,sipAddresses,skills,urls,userDefined
+
+ Useful types:
+ photos - a profile pic
  emailAddresses - to map the person to our calendar data
  relations - the manager
  organizations - what department???
@@ -32,6 +37,8 @@ fun loadDirectory(rioter: MyRioterInfo): CachedPeople? {
             directoryCacheLoader = GlobalScope.launch {
                 directoryCache = retrieveDirectory(rioter)
             }
+        } else if (directoryCacheLoader?.isCompleted == true) {
+            directoryCacheLoader = null
         }
     }
     return directoryCache
@@ -50,12 +57,12 @@ fun loadPeople(rioter: MyRioterInfo): CachedPeople? {
             peopleCacheLoader = GlobalScope.launch {
                 peopleCache = retrievePeople(rioter)
             }
+        } else if (peopleCacheLoader?.isCompleted == true) {
+            peopleCacheLoader = null
         }
     }
     return peopleCache
 }
-
-
 
 /**
  * Calls the Google People API directory to retrieve profile data and create cached objects based on that.
@@ -71,7 +78,7 @@ suspend fun retrieveDirectory(rioter: MyRioterInfo): CachedPeople {
     val sources = ArrayList<String>()
     // sources.add("DIRECTORY_SOURCE_TYPE_DOMAIN_CONTACT")
     sources.add("DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE")
-    val mask = "organizations,emailAddresses"
+    val mask = "organizations,emailAddresses,photos"
 
     val people: MutableMap<String, CachedPerson> = HashMap()
     var page: String? = null
