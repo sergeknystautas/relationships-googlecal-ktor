@@ -60,20 +60,19 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.servlet:servlet-api:2.5" level="project" />
     <orderEntry type="library" name="Maven: joda-time:joda-time:2.10" level="project" />
     <orderEntry type="library" name="Maven: com.google.code.gson:gson:2.8.2" level="project" />
-    <orderEntry type="library" name="Maven: io.ktor:ktor-server-core:1.5.1" level="project" />
-    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.21" level="project" />
+    <orderEntry type="library" name="Maven: io.ktor:ktor-server-core:1.5.3-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.4.30" level="project" />
     <orderEntry type="library" name="Maven: org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:1.4.2-native-mt" level="project" />
     <orderEntry type="library" name="Maven: org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2-native-mt" level="project" />
-    <orderEntry type="library" name="Maven: io.ktor:ktor-utils-jvm:1.5.1" level="project" />
-    <orderEntry type="library" name="Maven: org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.4.2-native-mt" level="project" />
-    <orderEntry type="library" name="Maven: io.ktor:ktor-io-jvm:1.5.1" level="project" />
-    <orderEntry type="library" name="Maven: io.ktor:ktor-http-jvm:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: io.ktor:ktor-utils-jvm:1.5.3-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: io.ktor:ktor-io-jvm:1.5.3-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: io.ktor:ktor-http-jvm:1.5.3-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.typesafe:config:1.3.1" level="project" />
-    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-reflect:1.4.21" level="project" />
-    <orderEntry type="library" name="Maven: io.ktor:ktor-server-netty:1.5.1" level="project" />
-    <orderEntry type="library" name="Maven: io.ktor:ktor-server-host-common:1.5.1" level="project" />
-    <orderEntry type="library" name="Maven: io.ktor:ktor-http-cio-jvm:1.5.1" level="project" />
-    <orderEntry type="library" name="Maven: io.ktor:ktor-network-jvm:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: org.jetbrains.kotlin:kotlin-reflect:1.4.30" level="project" />
+    <orderEntry type="library" name="Maven: io.ktor:ktor-server-netty:1.5.3-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: io.ktor:ktor-server-host-common:1.5.3-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: io.ktor:ktor-http-cio-jvm:1.5.3-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: io.ktor:ktor-network-jvm:1.5.3-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty-codec-http2:4.1.54.Final" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty-common:4.1.54.Final" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty-buffer:4.1.54.Final" level="project" />
@@ -86,7 +85,7 @@
     <orderEntry type="library" name="Maven: io.netty:netty-transport-native-kqueue:4.1.54.Final" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty-transport-native-unix-common:4.1.54.Final" level="project" />
     <orderEntry type="library" name="Maven: io.netty:netty-transport-native-epoll:4.1.54.Final" level="project" />
-    <orderEntry type="library" name="Maven: io.ktor:ktor-velocity:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: io.ktor:ktor-velocity:1.5.3-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.apache.velocity:velocity-engine-core:2.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.commons:commons-lang3:3.5" level="project" />
     <orderEntry type="library" name="Maven: org.apache.velocity:velocity-tools:2.0" level="project" />
@@ -105,11 +104,11 @@
     <orderEntry type="library" name="Maven: org.apache.struts:struts-tiles:1.3.8" level="project" />
     <orderEntry type="library" name="Maven: org.apache.velocity:velocity:1.6.2" level="project" />
     <orderEntry type="library" name="Maven: commons-lang:commons-lang:2.4" level="project" />
-    <orderEntry type="library" name="Maven: io.ktor:ktor-gson:1.5.1" level="project" />
-    <orderEntry type="library" name="Maven: io.ktor:ktor-auth:1.5.1" level="project" />
-    <orderEntry type="library" name="Maven: io.ktor:ktor-client-core-jvm:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: io.ktor:ktor-gson:1.5.3-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: io.ktor:ktor-auth:1.5.3-SNAPSHOT" level="project" />
+    <orderEntry type="library" name="Maven: io.ktor:ktor-client-core-jvm:1.5.3-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: com.googlecode.json-simple:json-simple:1.1.1" level="project" />
-    <orderEntry type="library" name="Maven: io.ktor:ktor-client-apache:1.5.1" level="project" />
+    <orderEntry type="library" name="Maven: io.ktor:ktor-client-apache:1.5.3-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpasyncclient:4.1.4" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore-nio:4.4.13" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpcore:4.4.13" level="project" />

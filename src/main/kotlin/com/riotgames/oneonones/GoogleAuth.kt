@@ -41,11 +41,16 @@ val googleOauthProvider = OAuthServerSettings.OAuth2ServerSettings(
 
     clientId = clientId,
     clientSecret = clientSecret,
-    defaultScopes = listOf("profile", // no email, but gives full name, picture, and id
+    defaultScopes = listOf(
+        "profile", // no email, but gives full name, picture, and id
         "email", // email
         "https://www.googleapis.com/auth/calendar.readonly", // google calendar
-        "https://www.googleapis.com/auth/admin.directory.user.readonly" // user directory
-    , PeopleServiceScopes.CONTACTS_READONLY, PeopleServiceScopes.DIRECTORY_READONLY
+        "https://www.googleapis.com/auth/admin.directory.user.readonly", // user directory
+        PeopleServiceScopes.CONTACTS_READONLY, PeopleServiceScopes.DIRECTORY_READONLY,
+    ),
+    extraParameters = mapOf(
+        "access_type" to "offline", // make sure google sends a refresh token
+        "prompt" to "consent" // even if the user has already authenticated, the user has to validate the scopes allowed
     )
 )
 
