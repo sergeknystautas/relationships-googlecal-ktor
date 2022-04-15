@@ -9,7 +9,7 @@ The app is functional and has some improvements over the original app, aside fro
 ## Development
 ### System requirements
 The versions here specifically work, though newer versions may also.
-* [JDK 1.8 (aka Java 8, thanks Oracle)](https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html)
+* [JDK 11](https://www.oracle.com/in/java/technologies/javase/jdk11-archive-downloads.html)
 * [Maven 3.6](https://maven.apache.org/download.cgi)
 * [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli)
 * Probably need a heroku account, but unknown if that's needed for the CLI.
@@ -24,9 +24,14 @@ Create
 
 ``relationships/googlecal-ktor/.env``
 
-and put the OAuth secrets in there.  To build and run the service:
+and put the OAuth secrets in there.  This would look like
+``OAUTH_CLIENT_ID=<longcharsequence>``
+``OAUTH_CLIENT_SECRET=<medcharsequence>``
+``OAUTH_PROJECT=<shortcharsequence>``
 
-``mvn clean install && heroku local:start``
+To build and run the service:
+
+``mvn clean install && heroku local:start -p 5000``
 
 This uses maven to clean previous artifacts and rebuild, then calls the heroku CLI to run the app locally.  To see if this works go to:
 
