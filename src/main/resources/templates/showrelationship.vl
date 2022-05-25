@@ -35,12 +35,17 @@
         </div>
         <div class="col-3">
         <strong>Quick links</strong>
+        #if ($company == "Riot")
         <br />
         <a href="https://org.riotnet.io/people/$username">Profile</a>
         <br />
         <a href="https://riotgames.slack.com/team/$username">Slack</a>
         <br />
         Tenurous
+        #elseif ($company == "S6")
+        <br />
+        <a href="https://singularity6.slack.com/team/$username">Slack</a>
+        #end
         </div>
         <div class="col-3">
         what else???
