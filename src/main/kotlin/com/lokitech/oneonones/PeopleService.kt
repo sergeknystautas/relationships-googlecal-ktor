@@ -30,12 +30,12 @@ var peopleCache: CachedPeople? = null
 /**
  * Gets a reference to directory, if we haven't tried yet, start a job to download.
  */
-fun loadDirectory(rioter: MyRioterInfo): CachedPeople? {
+fun loadDirectory(employee: MyEmployeeInfo): CachedPeople? {
     runBlocking {
         if (directoryCache == null && directoryCacheLoader == null) {
             println("directoryLoader is null")
             directoryCacheLoader = GlobalScope.launch {
-                directoryCache = retrieveDirectory(rioter)
+                directoryCache = retrieveDirectory(employee)
             }
         } else if (directoryCacheLoader?.isCompleted == true) {
             directoryCacheLoader = null
@@ -47,15 +47,15 @@ fun loadDirectory(rioter: MyRioterInfo): CachedPeople? {
 /**
  * Gets a reference to people, if we haven't tried yet, start a job to download.
  */
-fun loadPeople(rioter: MyRioterInfo): CachedPeople? {
+fun loadPeople(employee: MyEmployeeInfo): CachedPeople? {
     runBlocking {
         // If the directory is available
         // And we have no people cache and the loading of that hasn't started
-        if (loadDirectory(rioter) != null && peopleCache == null && peopleCacheLoader == null) {
+        if (loadDirectory(employee) != null && peopleCache == null && peopleCacheLoader == null) {
             println("peopleLoader is null")
             // Start loading the people
             peopleCacheLoader = GlobalScope.launch {
-                peopleCache = retrievePeople(rioter)
+                peopleCache = retrievePeople(employee)
             }
         } else if (peopleCacheLoader?.isCompleted == true) {
             peopleCacheLoader = null
@@ -67,9 +67,9 @@ fun loadPeople(rioter: MyRioterInfo): CachedPeople? {
 /**
  * Calls the Google People API directory to retrieve profile data and create cached objects based on that.
  */
-suspend fun retrieveDirectory(rioter: MyRioterInfo): CachedPeople {
+suspend fun retrieveDirectory(employee: MyEmployeeInfo): CachedPeople {
 
-    val credential = CREDENTIAL_BUILDER.build().setAccessToken(rioter.accessToken).setRefreshToken(rioter.refreshToken)
+    val credential = CREDENTIAL_BUILDER.build().setAccessToken(employee.accessToken).setRefreshToken(employee.refreshToken)
 
     val service = PeopleService.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
         .setApplicationName(projectName)
@@ -123,15 +123,15 @@ suspend fun retrieveDirectory(rioter: MyRioterInfo): CachedPeople {
 /**
  * Calls the Google People API to retrieve profile data and create cached objects based on that.
  */
-suspend fun retrievePeople(rioter: MyRioterInfo): CachedPeople {
+suspend fun retrievePeople(employee: MyEmployeeInfo): CachedPeople {
 
-    val credential = CREDENTIAL_BUILDER.build().setAccessToken(rioter.accessToken).setRefreshToken(rioter.refreshToken)
+    val credential = CREDENTIAL_BUILDER.build().setAccessToken(employee.accessToken).setRefreshToken(employee.refreshToken)
 
     val service = PeopleService.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential)
         .setApplicationName(projectName)
         .build()
 
-    val directory = loadDirectory(rioter)
+    val directory = loadDirectory(employee)
         ?: throw NullPointerException("Directory is not yet loaded, this should not be possible to call")
     val people: MutableMap<String, CachedPerson> = HashMap()
     // Take the directory info as the starting point for people

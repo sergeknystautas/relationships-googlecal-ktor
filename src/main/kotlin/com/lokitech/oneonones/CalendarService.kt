@@ -21,35 +21,35 @@ var calendarCache= WeakHashMap<String, CachedCalendar>()
 /**
  * Gets a reference to people, if we haven't tried yet, start a job to download.
  */
-suspend fun loadCalendar(rioter: MyRioterInfo): CachedCalendar? {
+suspend fun loadCalendar(employee: MyEmployeeInfo): CachedCalendar? {
     runBlocking {
-        if (calendarCache[rioter.uid] == null && calendarCacheLoader[rioter.uid] == null) {
-            println("calendarLoader for ${rioter.uid} is null")
-            calendarCacheLoader[rioter.uid] = GlobalScope.launch {
-                calendarCache[rioter.uid] = retrieveCalendar(rioter)
+        if (calendarCache[employee.uid] == null && calendarCacheLoader[employee.uid] == null) {
+            println("calendarLoader for ${employee.uid} is null")
+            calendarCacheLoader[employee.uid] = GlobalScope.launch {
+                calendarCache[employee.uid] = retrieveCalendar(employee)
             }
-        } else if (calendarCacheLoader[rioter.uid]?.isCompleted == true) {
+        } else if (calendarCacheLoader[employee.uid]?.isCompleted == true) {
             // We have finished loading.  This is important in case there was an exception loading
             // the calendar, we want to clear this to allow the calendar to try to load again.
-            calendarCacheLoader.remove(rioter.uid)
+            calendarCacheLoader.remove(employee.uid)
         }
     }
-    var calendar = calendarCache[rioter.uid]
+    var calendar = calendarCache[employee.uid]
     if (calendar != null) {
-        calendar = retrieveCalendar(rioter)
+        calendar = retrieveCalendar(employee)
     }
     return calendar
 }
 
-suspend fun retrieveCalendar(rioter: MyRioterInfo): CachedCalendar {
-    val tz = retrieveCalendarTZ(rioter)
+suspend fun retrieveCalendar(employee: MyEmployeeInfo): CachedCalendar {
+    val tz = retrieveCalendarTZ(employee)
     val jodaTZ = DateTimeZone.forID(tz)
     val now = DateTime(jodaTZ)
-    return retrieveEvents(rioter, now, jodaTZ)
+    return retrieveEvents(employee, now, jodaTZ)
 }
 
-suspend fun retrieveCalendarTZ(rioter: MyRioterInfo): String {
-    val credential = CREDENTIAL_BUILDER.build().setAccessToken(rioter.accessToken).setRefreshToken(rioter.refreshToken)
+suspend fun retrieveCalendarTZ(employee: MyEmployeeInfo): String {
+    val credential = CREDENTIAL_BUILDER.build().setAccessToken(employee.accessToken).setRefreshToken(employee.refreshToken)
     // TODO - when token refreshing works, do that
     val service = Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(projectName).build()
     // This should always return 1 calendar
@@ -58,19 +58,19 @@ suspend fun retrieveCalendarTZ(rioter: MyRioterInfo): String {
 }
 
 /**
- * Function to call Google Calendar API using the local rioter and a parameter for the time, assumed to be now
+ * Function to call Google Calendar API using the local employee and a parameter for the time, assumed to be now
  * in normal operation.  This transforms the Google API objects into condensed and serializable cache objects
  * defined in CalendarCache.kt.
  */
-suspend fun retrieveEvents(rioter: MyRioterInfo, now: DateTime, jodaTZ: DateTimeZone): CachedCalendar {
-    val credential = CREDENTIAL_BUILDER.build().setAccessToken(rioter.accessToken).setRefreshToken(rioter.refreshToken)
+suspend fun retrieveEvents(employee: MyEmployeeInfo, now: DateTime, jodaTZ: DateTimeZone): CachedCalendar {
+    val credential = CREDENTIAL_BUILDER.build().setAccessToken(employee.accessToken).setRefreshToken(employee.refreshToken)
 
     // TODO This doesn't work yet, so commenting it out but if can get the refresh token, can see if this works.
     // or might implement a different pattern.
     // val originalAccessToken = credential.accessToken
-    // refreshToken(rioter)
+    // refreshToken(employee)
 
-    val oldCalendar = calendarCache[rioter.uid]
+    val oldCalendar = calendarCache[employee.uid]
 
     val service = Calendar.Builder(HTTP_TRANSPORT, JSON_FACTORY, credential).setApplicationName(projectName).build()
 
@@ -112,8 +112,8 @@ suspend fun retrieveEvents(rioter: MyRioterInfo, now: DateTime, jodaTZ: DateTime
 
     // TODO: This doesn't work yet, so had this while trying to confirm it would rather than it silently working
     // if (originalAccessToken != credential.accessToken) {
-        // updateRioterInfo(rioter, credential.accessToken, credential.refreshToken)
-        // // debug("We updated ${rioter.given_name}'s oauth credentials!")
+        // updateEmployeeInfo(employee, credential.accessToken, credential.refreshToken)
+        // // debug("We updated ${employee.given_name}'s oauth credentials!")
     // }
 
     val calendarCache = calendarBuilder.createCalendar(oldCalendar, updated!!, syncToken!!, items, jodaTZ)

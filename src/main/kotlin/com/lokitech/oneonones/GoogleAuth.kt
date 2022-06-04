@@ -20,7 +20,7 @@ import io.ktor.http.*
  * More about this at https://devcenter.heroku.com/articles/config-vars.
  */
 
-// Project details defined in serge.knystautas@riotgames.com Google developer dashboard
+// Project details defined in serge.knystautas@riotgames.com and sknystautas@singularity6.com Google developer dashboard
 // Secrets pulled using Heroku's secrets pattern
 val projectName = System.getenv("OAUTH_PROJECT") ?: "innate-harbor-XXXX"
 val clientId = System.getenv("OAUTH_CLIENT_ID") ?: "xxxxxxxxxxx.apps.googleusercontent.com"

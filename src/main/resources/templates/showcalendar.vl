@@ -26,7 +26,7 @@
 #macro(relationships $filter)
   <div class="row">
     <div class="col-3">
-      <strong>$employee</strong>
+      <strong>${employer.employeeTerm}</strong>
     </div>
     <div class="col-3">
       <strong>#if ($filter == "building") Next meeting #elseif ($filter == "aging") Last meeting #else Meeting #end</strong>
@@ -70,7 +70,7 @@
         <div class="tab-pane fade" id="nav-building" role="tabpanel" aria-labelledby="nav-building-tab">
           <div class="row">
             <div class="col-12">
-              <h3>${employee}s you are scheduled to meet</h3>
+              <h3>${employer.employeeTerm}s you are scheduled to meet</h3>
             </div>
           </div>
           #relationships("building")
@@ -78,7 +78,7 @@
         <div class="tab-pane fade" id="nav-aging" role="tabpanel" aria-labelledby="nav-aging-tab">
           <div class="row">
             <div class="col-12">
-              <h3>${employee}s you are <strong>not</strong> scheduled to meet</h3>
+              <h3>${employer.employeeTerm}s you are <strong>not</strong> scheduled to meet</h3>
             </div>
           </div>
           #relationships("aging")

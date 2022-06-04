@@ -79,7 +79,7 @@ fun Application.module() {
     }
     // Session management using the SessionService.
     install(Sessions) {
-        cookie<MyRioterUid>("oauthSeshId") {
+        cookie<MyEmployeeUid>("oauthSeshId") {
             val secretSignKey = hex("5683a6436b09875f174ebae642cb5a8d") // Generated randomly at https://www.browserling.com/tools/random-hex
             transform(SessionTransportTransformerMessageAuthentication(secretSignKey))
         }
@@ -116,7 +116,7 @@ fun Application.module() {
         // The home page
         get("/") {
             val model = mutableMapOf<String, Any>()
-            val session = call.sessions.get<MyRioterUid>()
+            val session = call.sessions.get<MyEmployeeUid>()
             // If you're not signed in, we'll render with a welcome page.
             if (session == null) {
                 call.respond(VelocityContent("templates/welcome.vl", model))
@@ -125,20 +125,21 @@ fun Application.module() {
 
             // If you sent a cookie like you're logged in, but we can't find you in our session service
             // Redirect you to the logout page.
-            val rioter = loadRioterInfo(session.uid)
-            if (rioter == null) {
+            val employee = loadEmployeeInfo(session.uid)
+            if (employee == null) {
                 call.respondRedirect("/logout", permanent = false)
                 return@get
             }
 
             // Generate our main report
-            model["rioter"] = rioter
+            model["employee"] = employee
+            model["employer"] = getEmployerInfo(employee)
             model["esc"] = ESCAPE_TOOL
 
-            val calendar = loadCalendar(rioter)
-            val directory = loadDirectory(rioter)
+            val calendar = loadCalendar(employee)
+            val directory = loadDirectory(employee)
 
-            val tz = retrieveCalendarTZ(rioter)
+            val tz = retrieveCalendarTZ(employee)
             val jodaTZ = DateTimeZone.forID(tz)
             val now = DateTime(jodaTZ)
             val today = now.toLocalDate().toDateTimeAtStartOfDay(jodaTZ)
@@ -160,7 +161,7 @@ fun Application.module() {
 
         get("/r/{email}") {
             val model = mutableMapOf<String, Any>()
-            val session = call.sessions.get<MyRioterUid>()
+            val session = call.sessions.get<MyEmployeeUid>()
             // If you're not signed in, we'll render with a welcome page.
             if (session == null) {
                 call.respond(VelocityContent("templates/welcome.vl", model))
@@ -169,21 +170,22 @@ fun Application.module() {
 
             // If you sent a cookie like you're logged in, but we can't find you in our session service
             // Redirect you to the logout page.
-            val rioter = loadRioterInfo(session.uid)
-            if (rioter == null) {
+            val employee = loadEmployeeInfo(session.uid)
+            if (employee == null) {
                 call.respondRedirect("/logout", permanent = false)
                 return@get
             }
             val email = call.parameters["email"].toString()
-            val tz = retrieveCalendarTZ(rioter)
+            val tz = retrieveCalendarTZ(employee)
             val jodaTZ = DateTimeZone.forID(tz)
             val now = DateTime(jodaTZ)
             val today = now.toLocalDate().toDateTimeAtStartOfDay(jodaTZ)
 
-            val calendar = loadCalendar(rioter)
-            val directory = loadDirectory(rioter)
+            val calendar = loadCalendar(employee)
+            val directory = loadDirectory(employee)
 
-            model["rioter"] = rioter
+            model["employee"] = employee
+            model["employer"] = getEmployerInfo(employee)
             model["email"] = email
             model["updatedFormatter"] = DateTimeFormat.forPattern("MMM d, yyyy h:mm a")
             model["formatter"] = DateTimeFormat.forPattern("EE, MMM d, yyyy")
@@ -193,7 +195,8 @@ fun Application.module() {
             if (calendar != null && directory != null) {
                 val person = directory.people.filter{it.emailAddress == email}
                 model["person"] = person[0]
-                model["username"] = email.removeSuffix("@riotgames.com")
+                // model["username"] = email.removeSuffix("@riotgames.com")
+                model["username"] = email.takeWhile{ it != '@' }
                 model["report"] = PersonOneOnOneBuilder().build(calendar.events, email, jodaTZ, directory.people)
                 model["updated"] = DateTime(calendar.updated, jodaTZ)
             } else {
@@ -205,15 +208,15 @@ fun Application.module() {
         }
 
         get("/people") {
-            val session = call.sessions.get<MyRioterUid>()
-            val rioter = session?.let { it1 -> loadRioterInfo(it1.uid) }
-            if (rioter == null) {
+            val session = call.sessions.get<MyEmployeeUid>()
+            val employee = session?.let { it1 -> loadEmployeeInfo(it1.uid) }
+            if (employee == null) {
                 call.respondRedirect("/logout", permanent = false)
                 return@get
             }
 
             val model = mutableMapOf<String, Any>()
-            val localPeople = loadPeople(rioter)
+            val localPeople = loadPeople(employee)
             if (localPeople != null) {
                 model["people"] = localPeople.people.sortedBy { it.emailAddress }
             } else {
@@ -236,7 +239,7 @@ fun Application.module() {
 
         // Clear the session, go back to the home page.
         get("/logout") {
-            call.sessions.clear<MyRioterUid>()
+            call.sessions.clear<MyEmployeeUid>()
             call.respondRedirect("/", permanent = false)
         }
 
@@ -279,9 +282,9 @@ fun Application.module() {
                     println("SUCCESSFUL LOGIN by $name / $email")
 
                     // Store to file sessions the user id
-                    saveRioterInfo(principal, data)
+                    saveEmployeeInfo(principal, data)
                     // Save this in the user's session to persist
-                    call.sessions.set(MyRioterUid(uid))
+                    call.sessions.set(MyEmployeeUid(uid))
 
                     call.respondRedirect("/")
                 }
@@ -296,10 +299,10 @@ fun Application.module() {
  */
 private suspend fun displayError(call: ApplicationCall, cause: Throwable, printStack: Boolean) {
     if (printStack) {
-        val rioter = call.sessions.get<MyRioterUid>()?.let { loadRioterInfo(it.uid) }
+        val employee = call.sessions.get<MyEmployeeUid>()?.let { loadEmployeeInfo(it.uid) }
         val user = User().apply {
             // If you're signed in, we add this user info to the crash report
-            email = rioter?.email
+            email = employee?.email
             ipAddress = call.request.origin.remoteHost
         }
         Sentry.withScope { scope ->
