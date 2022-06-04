@@ -1,4 +1,4 @@
-package com.riotgames.oneonones
+package com.lokitech.oneonones
 
 import com.google.api.services.calendar.Calendar
 import com.google.api.services.calendar.model.Event

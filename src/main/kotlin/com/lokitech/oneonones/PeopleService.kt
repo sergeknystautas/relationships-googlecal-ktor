@@ -1,4 +1,4 @@
-package com.riotgames.oneonones
+package com.lokitech.oneonones
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException
 import com.google.api.services.people.v1.PeopleService

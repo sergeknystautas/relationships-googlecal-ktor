@@ -1,4 +1,4 @@
-package com.riotgames.oneonones
+package com.lokitech.oneonones
 
 import com.google.api.client.auth.oauth2.TokenResponse
 import com.google.api.client.googleapis.auth.oauth2.GoogleRefreshTokenRequest

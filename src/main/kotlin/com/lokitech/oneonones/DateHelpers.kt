@@ -1,4 +1,4 @@
-package com.riotgames.oneonones
+package com.lokitech.oneonones
 
 import org.joda.time.DateTime
 import org.joda.time.Period

@@ -1,4 +1,4 @@
-package com.riotgames.oneonones
+package com.lokitech.oneonones
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
