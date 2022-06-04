@@ -1,4 +1,4 @@
-package com.riotgames.oneonones
+package com.lokitech.oneonones
 
 import com.google.api.services.people.v1.model.Person
 import com.google.api.services.people.v1.model.PersonResponse

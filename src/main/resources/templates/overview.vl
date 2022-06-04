@@ -2,9 +2,9 @@
     <div class="col-12">
     <h3>How this works</h3>
     <p>
-    This helps you make sense of your calendar to help understand your relationships at Riot.  This scans your calendar
+    This helps you make sense of your calendar to help understand your relationships at ${employer.label}.  This scans your calendar
     for events with 1 other person where neither of you declined the invite (not responding or saying maybe is still fine).
-    We also filter for only active Rioters, so not anyone who have left-the-game or are not with a riotgames.com email address.
+    We also filter for only active ${employer.employeeTerm}s, so not anyone who have left-the-game or are not with a ${employer.domain} email address.
     </p>
     <h4>Tracking meetings with ${report.meetings.size()} people</h4>
     <h3>How to use</h3>
@@ -19,7 +19,7 @@
     </li>
     <li>
       You can click anyone's name or email address and see more about them and all of the meetings we found.
-      This is useful to click into Riot's profile system or if you just want to slack someone.
+      This is useful to click into ${employer.name}'s profile system or if you just want to slack someone.
     </li>
     </ul>
     </div>
