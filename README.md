@@ -1,7 +1,7 @@
 # One on one tracker 
 This is the Heroku/Kotlin rewrite of my prior [Docker/Java one-on-one app report](https://github.com/sergeknystautas/relationships-googlecal).
 
-The production version of this app is hosted at https://riot-1on1s.herokuapp.com/.  The OAuth account is configured to only allow riotgames.com email addresses as it requires access to calendar and directory information.
+The production version of this app is hosted at https://s6-1on1s.herokuapp.com/ and https://riot-1on1s.herokuapp.com/.  The OAuth account is configured to only allow singularity6.com and riotgames.com email addresses as it requires access to calendar and directory information.
 
 The app is functional and has some improvements over the original app, aside from also, actually working.  The remaining work and some ideas is in the [TODO](https://github.com/sergeknystautas/relationships-googlecal-ktor/blob/main/TODO) file and in the project's [Github issue tracker](https://github.com/sergeknystautas/relationships-googlecal-ktor/issues).
 
@@ -50,8 +50,8 @@ This app uses the [Heroku-20 stack](https://devcenter.heroku.com/articles/heroku
 ### Branching strategy
 
 We follow a simple version of [git-flow](https://nvie.com/posts/a-successful-git-branching-model/).
-* The production/live website at https://riot-1on1s.herokuapp.com/ is tied to the ``main`` branch.
-* The staging website at https://riot-1on1s-staging.herokuapp.com/ is tied to the ``staging`` branch.
+* The production/live website at https://s6-1on1s.herokuapp.com/ and https://riot-1on1s.herokuapp.com/ is tied to the ``main`` branch.
+* The staging website at https://s6-1on1s-staging.herokuapp.com/ and https://riot-1on1s-staging.herokuapp.com/ is tied to the ``staging`` branch.
 
 We are not using github-flow or the development and release branch strategy yet given the small size of the team.
 
@@ -92,7 +92,7 @@ We use Sentry's crash reporting to track stack traces in the Kotlin app.  If the
 
 ### Google APIs
 
-This application heavily on Google APIs.  Because this is meant solely for riotgames.com usage, the application was created in that domain.  Its name is ``One-on-One Project``.
+This application heavily on Google APIs.  Because this is meant solely for singularity6.com and riotgames.com usage, the application was created in that domain.  Its name is ``One-on-One Project``.
 
 We created an OAuth2 `web client` which needed authorized redirect URLs added for `localhost` as well as the staging and production hostnames and `/login`.
 
